@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chef Mama: Modern Gourmet Kitchen 🍳</title>
+  <meta name="description" content="Game simulasi memasak modern bergaya Cooking Mama dengan resep café kekinian dan interaksi seru!">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-cream: #FFF7ED;
+      --bg-kitchen: #FED7AA;
+      --primary: #F97316;
+      --primary-hover: #EA580C;
+      --secondary: #10B981;
+      --accent-pink: #FB7185;
+      --accent-yellow: #FBBF24;
+      --accent-purple: #A855F7;
+      --dark: #1E293B;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --shadow-soft: 0 10px 25px -5px rgba(249, 115, 22, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --shadow-pop: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #FFFBEB, #FEF3C7 60%, #FDE68A 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Ambient background pattern */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(#F97316 1.2px, transparent 1.2px), 
+        radial-gradient(#FBBF24 1.2px, transparent 1.2px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 900px;
+      min-height: 640px;
+      height: 92vh;
+      max-height: 820px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 3px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 50px -12px rgba(249, 115, 22, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 15px;
+    }
+
+    /* Top Bar */
+    header {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px dashed rgba(249, 115, 22, 0.2);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Fredoka', cursive;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #FF6B6B, #F97316);
+      color: white;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      background: white;
+      border: 2px solid #FED7AA;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .icon-btn:hover {
+      transform: scale(1.1) rotate(5deg);
+      background: #FFF7ED;
+      border-color: var(--primary);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Main Area Container */
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(10px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 20px 28px;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: scale(1) translateY(0);
+    }
+
+    /* ---------------------------------
+       HOME / LOBBY SCREEN
+    --------------------------------- */
+    #screen-lobby {
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: 30px 24px;
+    }
+
+    .hero-banner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .hero-title {
+      font-family: 'Fredoka', cursive;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #EA580C;
+      text-shadow: 2px 3px 0 #FDE68A, 4px 5px 0 rgba(0,0,0,0.06);
+      line-height: 1.15;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: #64748B;
+      max-width: 500px;
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 760px;
+      margin: 15px 0;
+    }
+
+    @media (max-width: 650px) {
+      .recipe-grid {
+        grid-template-columns: 1fr;
+        max-height: 380px;
+        overflow-y: auto;
+        padding: 5px;
+      }
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .recipe-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      border: 3px solid #FFEDD5;
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.08);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .recipe-card::after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      bottom: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(249, 115, 22, 0.06);
+      pointer-events: none;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 14px 25px rgba(249, 115, 22, 0.2);
+    }
+
+    .recipe-card.selected {
+      border-color: #F97316;
+      background: #FFF7ED;
+    }
+
+    .recipe-icon {
+      font-size: 2.8rem;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: #FFFBEB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 2px solid #FEF08A;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+    }
+
+    .recipe-info h3 {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.2rem;
+      color: #1E293B;
+      margin-bottom: 4px;
+    }
+
+    .recipe-info p {
+      font-size: 0.85rem;
+      color: #64748B;
+      line-height: 1.3;
+    }
+
+    .recipe-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: #E0F2FE;
+      color: #0284C7;
+    }
+
+    .tag.hot {
+      background: #FEE2E2;
+      color: #EF4444;
+    }
+
+    .tag.chef {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .btn-main {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #F97316, #EA580C);
+      border: none;
+      border-radius: 50px;
+      padding: 14px 44px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35), inset 0 2px 0 rgba(255,255,255,0.4);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 12px 25px rgba(234, 88, 12, 0.45);
+    }
+
+    .btn-main:active {
+      transform: translateY(1px) scale(0.97);
+    }
+
+    /* ---------------------------------
+       CHEF MAMA WIDGET & DIALOGUE
+    --------------------------------- */
+    .mama-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 2px solid #FED7AA;
+      border-radius: 40px;
+      padding: 8px 18px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .mama-avatar-wrap {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #FEF08A;
+      border: 3px solid #F59E0B;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+
+    .mama-avatar-svg {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.2s ease;
+    }
+
+    .mama-dialogue {
+      flex: 1;
+    }
+
+    .mama-name {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #EA580C;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mama-speech {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.05rem;
+      color: #334155;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .step-pill {
+      background: #EFF6FF;
+      color: #2563EB;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 2px solid #BFDBFE;
+      white-space: nowrap;
+    }
+
+    /* ---------------------------------
+       GAMEPLAY ARENA
+    --------------------------------- */
+    #screen-game {
+      padding: 14px 24px;
+      justify-content: space-between;
+    }
+
+    .game-arena {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #FFFFFF 0%, #FFF7ED 100%);
+      border-radius: var(--radius-md);
+      border: 3px solid #FDBA74;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.04);
+      margin-bottom: 12px;
+    }
+
+    /* Stage Header Info inside arena */
+    .stage-hud {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hud-box {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      border-radius: 30px;
+      border: 2px solid #FED7AA;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      font-family: 'Fredoka', cursive;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+
+    .hud-score {
+      color: #D97706;
+      font-weight: 700;
+    }
+
+    .hud-timer {
+      color: #DC2626;
+      font-weight: 700;
+    }
+
+    /* Interactive Feedback Overlay (PERFECT!, GREAT!, OOPS!) */
+    .feedback-popup {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.4);
+      opacity: 0;
+      font-family: 'Fredoka', cursive;
+      font-size: 3rem;
+      font-weight: 700;
+      padding: 8px 24px;
+      border-radius: 40px;
+      text-shadow: 0 4px 0 rgba(0,0,0,0.15);
+      pointer-events: none;
+      z-index: 50;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .feedback-popup.show {
+      transform: translate(-50%, -50%) scale(1.15) rotate(-3deg);
+      opacity: 1;
+    }
+
+    .feedback-perfect {
+      background: linear-gradient(135deg, #FBBF24, #F59E0B);
+      color: white;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
+    }
+
+    .feedback-great {
+      background: linear-gradient(135deg, #34D399, #059669);
+      color: white;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .feedback-oops {
+      background: linear-gradient(135deg, #F87171, #DC2626);
+      color: white;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    /* ---------------------------------
+       MINI-GAME 1: CHOPPING BOARD
+    --------------------------------- */
+    .board-container {
+      width: 90%;
+      max-width: 580px;
+      height: 340px;
+      background: #D97706;
+      border-radius: 30px;
+      padding: 16px;
+      box-shadow: 0 16px 0 #92400E, 0 25px 35px rgba(0,0,0,0.25);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cutting-board {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 100%);
+      border-radius: 20px;
+      position: relative;
+      border: 4px solid #B45309;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    .cutting-board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(90deg, transparent, transparent 38px, rgba(180, 83, 9, 0.1) 40px);
+      pointer-events: none;
+    }
+
+    .ingredient-target {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s ease;
+    }
+
+    .ingredient-target svg {
+      filter: drop-shadow(0 12px 10px rgba(0,0,0,0.18));
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .cut-line {
+      position: absolute;
+      top: 10%;
+      bottom: 10%;
+      width: 6px;
+      background: repeating-linear-gradient(0deg, #EF4444, #EF4444 8px, transparent 8px, transparent 16px);
+      border-radius: 4px;
+      animation: pulseCut 0.8s infinite alternate ease-in-out;
+      pointer-events: none;
+      filter: drop-shadow(0 0 5px rgba(239,68,68,0.8));
+    }
+
+    @keyframes pulseCut {
+      0% { opacity: 0.4; transform: scaleY(0.9); }
+      100% { opacity: 1; transform: scaleY(1.05); }
+    }
+
+    /* ---------------------------------
+       MINI-GAME 2: SEARING / FLIP METER
+    --------------------------------- */
+    .pan-stove {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .skillet {
+      width: 270px;
+      height: 270px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #334155 0%, #0F172A 80%);
+      border: 12px solid #475569;
+      box-shadow: 0 16px 0 #1E293B, 0 25px 30px rgba(0,0,0,0.3);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .skillet-handle {
+      position: absolute;
+      right: -85px;
+      width: 95px;
+      height: 26px;
+      background: #1E293B;
+      border-radius: 8px 20px 20px 8px;
+      border: 3px solid #475569;
+      box-shadow: 0 6px 0 #0F172A;
+    }
+
+    .sizzle-smoke {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .smoke-puff {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      animation: riseSmoke 1.2s infinite ease-out;
+    }
+
+    @keyframes riseSmoke {
+      0% { transform: translateY(0) scale(0.6); opacity: 0.8; }
+      100% { transform: translateY(-70px) scale(2.2); opacity: 0; }
+    }
+
+    .meter-container {
+      position: absolute;
+      bottom: 25px;
+      width: 82%;
+      max-width: 440px;
+      background: white;
+      padding: 10px 18px;
+      border-radius: 40px;
+      border: 3px solid #FED7AA;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meter-bar {
+      position: relative;
+      width: 100%;
+      height: 24px;
+      background: #E2E8F0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #CBD5E1;
+    }
+
+    .meter-zone-perfect {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 65%;
+      width: 20%;
+      background: repeating-linear-gradient(45deg, #10B981, #10B981 8px, #34D399 8px, #34D399 16px);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+    }
+
+    .meter-indicator {
+      position: absolute;
+      top: -2px;
+      bottom: -2px;
+      width: 10px;
+      background: #EA580C;
+      border: 2px solid white;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+      transform: translateX(-50%);
+      left: 0%;
+      transition: left 0.05s linear;
+    }
+
+    /* ---------------------------------
+       MINI-GAME 3: WHISKING & STIRRING
+    --------------------------------- */
+    .bowl-container {
+      width: 290px;
+      height: 290px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFFFFF 20%, #F1F5F9 85%);
+      border: 14px solid #CBD5E1;
+      box-shadow: 0 16px 0 #94A3B8, 0 25px 35px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .batter-liquid {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #86EFAC 30%, #22C55E 90%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .swirl-ripple {
+      position: absolute;
+      border: 4px dashed rgba(255,255,255,0.7);
+      border-radius: 50%;
+      width: 80%;
+      height: 80%;
+      animation: spinRipple 2s linear infinite;
+    }
+
+    @keyframes spinRipple {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .stir-prompt {
+      position: absolute;
+      top: 15px;
+      background: rgba(255,255,255,0.92);
+      border: 2px solid #38BDF8;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-family: 'Fredoka', cursive;
+      font-size: 0.95rem;
+      color: #0284C7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: bouncePrompt 1.2s infinite alternate;
+      z-index: 5;
+    }
+
+    @keyframes bouncePrompt {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-5px); }
+    }
+
+    /* ---------------------------------
+       MINI-GAME 4: PLATING & TOPPING
+    --------------------------------- */
+    .plate-station {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      position: relative;
+    }
+
+    .gourmet-plate {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFFFFF 60%, #F8FAFC 85%, #E2E8F0 100%);
+      border: 10px solid #FFFFFF;
+      box-shadow: 0 16px 0 #CBD5E1, 0 25px 40px rgba(0,0,0,0.12);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .plate-food-assembly {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toppings-dock {
+      width: 100%;
+      max-width: 580px;
+      background: white;
+      border: 3px solid #FED7AA;
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .topping-item {
+      background: #FFF7ED;
+      border: 2px dashed #FDBA74;
+      border-radius: 16px;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #7C2D12;
+      gap: 4px;
+    }
+
+    .topping-item:hover {
+      transform: translateY(-4px) scale(1.08);
+      background: #FFEDD5;
+      border-color: #EA580C;
+    }
+
+    .topping-item.placed {
+      opacity: 0.4;
+      pointer-events: none;
+      border-style: solid;
+      border-color: #CBD5E1;
+      background: #F1F5F9;
+    }
+
+    /* ---------------------------------
+       SCREEN RESULT / EVALUATION
+    --------------------------------- */
+    #screen-result {
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      padding: 30px 24px;
+    }
+
+    .polaroid-card {
+      background: white;
+      padding: 18px 18px 30px 18px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+      transform: rotate(-2deg);
+      max-width: 360px;
+      width: 100%;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .polaroid-card:hover {
+      transform: rotate(0deg) scale(1.03);
+    }
+
+    .polaroid-photo {
+      width: 100%;
+      height: 230px;
+      background: radial-gradient(circle, #FFFBEB 0%, #FEF3C7 100%);
+      border-radius: 8px;
+      border: 2px solid #FDE68A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .stamp-chef {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      border: 3px dashed #DC2626;
+      color: #DC2626;
+      font-family: 'Fredoka', cursive;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transform: rotate(-12deg);
+      background: rgba(254, 226, 226, 0.85);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .polaroid-caption {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.4rem;
+      color: #1E293B;
+      margin-top: 14px;
+    }
+
+    .stars-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      font-size: 2.4rem;
+      margin: 10px 0;
+    }
+
+    .star-icon {
+      filter: grayscale(1) opacity(0.3);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-block;
+    }
+
+    .star-icon.earned {
+      filter: grayscale(0) opacity(1);
+      transform: scale(1.15);
+      color: #FBBF24;
+      text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+    }
+
+    .result-score-tag {
+      font-family: 'Fredoka', cursive;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #EA580C;
+    }
+
+    .result-mama-verdict {
+      background: #FFF7ED;
+      border: 2px dashed #FDBA74;
+      border-radius: 20px;
+      padding: 12px 20px;
+      max-width: 480px;
+      font-size: 1.05rem;
+      color: #9A3412;
+      font-weight: 500;
+      margin: 10px 0;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .btn-secondary {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.15rem;
+      color: #475569;
+      background: white;
+      border: 2px solid #CBD5E1;
+      border-radius: 50px;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #F8FAFC;
+      border-color: #94A3B8;
+      transform: translateY(-2px);
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <span>🍳 Chef Mama</span>
+        <span class="brand-badge">Gourmet Edition</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btn-sound" title="Toggle Suara">🔊</button>
+        <button class="icon-btn" id="btn-restart-recipe" title="Pilih Resep Lain">📋</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ==========================================
+           1. LOBBY / RECIPE SELECTION SCREEN
+      ========================================== -->
+      <section class="screen active" id="screen-lobby">
+        <div class="hero-banner">
+          <h1 class="hero-title">Pilih Menu Modern Café! ✨</h1>
+          <p class="hero-subtitle">Bantu Mama memasak makanan kekinian dengan cita rasa gourmet dan plating bintang 5!</p>
+        </div>
+
+        <div class="recipe-grid" id="recipe-list">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <button class="btn-main" id="btn-start-cook">
+          <span>Mulai Memasak</span> 👩‍🍳
+        </button>
+      </section>
+
+      <!-- ==========================================
+           2. COOKING GAMEPLAY ARENA SCREEN
+      ========================================== -->
+      <section class="screen" id="screen-game">
+        <!-- Top Mama Bar -->
+        <div class="mama-bar">
+          <div class="mama-avatar-wrap">
+            <svg class="mama-avatar-svg" id="mama-avatar-svg" viewBox="0 0 100 100">
+              <!-- Chef Mama Cute Face SVG -->
+              <circle cx="50" cy="50" r="46" fill="#FED7AA"/>
+              <!-- Hair -->
+              <path d="M 12 45 Q 50 -10 88 45 Q 85 20 50 15 Q 15 20 12 45 Z" fill="#92400E"/>
+              <ellipse cx="14" cy="52" rx="8" ry="12" fill="#92400E"/>
+              <ellipse cx="86" cy="52" rx="8" ry="12" fill="#92400E"/>
+              <!-- Bandana / Chef Hat -->
+              <path d="M 14 38 Q 50 25 86 38 Q 90 20 50 18 Q 10 20 14 38 Z" fill="#FB7185"/>
+              <circle cx="28" cy="28" r="4" fill="white" opacity="0.8"/>
+              <circle cx="50" cy="26" r="4" fill="white" opacity="0.8"/>
+              <circle cx="72" cy="28" r="4" fill="white" opacity="0.8"/>
+              <!-- Cheeks -->
+              <ellipse cx="28" cy="62" rx="8" ry="5" fill="#FDA4AF" opacity="0.85"/>
+              <ellipse cx="72" cy="62" rx="8" ry="5" fill="#FDA4AF" opacity="0.85"/>
+              <!-- Eyes (Dynamic) -->
+              <g id="mama-eyes">
+                <circle cx="34" cy="52" r="5" fill="#1E293B"/>
+                <circle cx="66" cy="52" r="5" fill="#1E293B"/>
+                <circle cx="36" cy="50" r="1.8" fill="white"/>
+                <circle cx="68" cy="50" r="1.8" fill="white"/>
+              </g>
+              <!-- Mouth (Dynamic) -->
+              <path id="mama-mouth" d="M 42 66 Q 50 75 58 66" fill="none" stroke="#991B1B" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="mama-dialogue">
+            <div class="mama-name">
+              <span>Chef Mama</span>
+              <span id="recipe-name-pill" style="color:#059669; font-weight:600;">• Artisan Toast</span>
+            </div>
+            <div class="mama-speech" id="mama-speech-text">Yuk siapkan bahan pertama! Ikuti instruksi Mama ya!</div>
+          </div>
+          <div class="step-pill" id="step-indicator">Langkah 1/4</div>
+        </div>
+
+        <!-- The Interactive Gameplay Stage -->
+        <div class="game-arena" id="game-arena">
+          <!-- Floating In-game HUD -->
+          <div class="stage-hud">
+            <div class="hud-box">
+              <span>⭐ Skor:</span>
+              <span class="hud-score" id="arena-score">0</span>
+            </div>
+            <div class="hud-box">
+              <span>⏱️ Sisa Waktu:</span>
+              <span class="hud-timer" id="arena-timer">15s</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Mini-Game Content loaded here -->
+          <div id="minigame-content" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <!-- Injected by step renderers -->
+          </div>
+
+          <!-- Floating Judgement Popup (PERFECT!, GREAT!, OOPS!) -->
+          <div class="feedback-popup" id="feedback-popup">PERFECT! ✨</div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. RESULT / EVALUATION SCREEN
+      ========================================== -->
+      <section class="screen" id="screen-result">
+        <h2 style="font-family:'Fredoka', cursive; font-size:2.2rem; color:#EA580C;">Selesai Dimasak! 🍽️</h2>
+
+        <div class="polaroid-card">
+          <div class="polaroid-photo" id="polaroid-food-photo">
+            <!-- Final dish SVG artwork preview -->
+          </div>
+          <div class="stamp-chef" id="chef-stamp">MASTER CHEF</div>
+          <div class="polaroid-caption" id="result-dish-title">Truffle Wagyu Burger</div>
+          <div class="stars-row" id="result-stars">
+            <span class="star-icon">⭐</span>
+            <span class="star-icon">⭐</span>
+            <span class="star-icon">⭐</span>
+          </div>
+          <div class="result-score-tag" id="result-score-percent">98%</div>
+        </div>
+
+        <div class="result-mama-verdict" id="result-mama-comment">
+          "Luar biasa! Bahkan Mama sendiri kagum dengan kelezatannya! Restoran bintang lima pasti bangga!"
+        </div>
+
+        <div class="result-actions">
+          <button class="btn-secondary" id="btn-replay">Masak Lagi 🔄</button>
+          <button class="btn-main" id="btn-menu-back">Pilih Menu Lain 📖</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Confetti canvas overlay -->
+    <canvas id="confetti-canvas"></canvas>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT LOGIC
+  ========================================== -->
+  <script>
+    /* ========================================================
+       1. SYNTHETIC WEB AUDIO API ENGINE (No external files!)
+    ======================================================== */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.soundEnabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        return this.soundEnabled;
+      }
+
+      // Quick synthetic sound effects
+      playChop() {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        
+        // Thud (low frequency punch)
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140, t);
+        osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
+        gain.gain.setValueAtTime(0.7, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.09);
+
+        // Knife slice noise burst
+        const bufferSize = this.ctx.sampleRate * 0.05;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(3000, t);
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.4, t);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(this.ctx.destination);
+        noise.start(t);
+      }
+
+      playSizzle(duration = 0.5) {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.6;
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(1800, t);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.linearRampToValueAtTime(0.35, t + duration * 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + duration);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(t);
+      }
+
+      playSwish() {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.exponentialRampToValueAtTime(620, t + 0.12);
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.13);
+      }
+
+      playFlip() {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.exponentialRampToValueAtTime(450, t + 0.15);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.16);
+      }
+
+      playPop() {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.exponentialRampToValueAtTime(800, t + 0.08);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.09);
+      }
+
+      playFeedback(type) {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        if (type === 'perfect') {
+          // Cheerful high arpeggio (C5 -> E5 -> G5 -> C6)
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, t + idx * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.06 + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t + idx * 0.06);
+            osc.stop(t + idx * 0.06 + 0.26);
+          });
+        } else if (type === 'great') {
+          const notes = [523.25, 659.25];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.18, t + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.08 + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t + idx * 0.08);
+            osc.stop(t + idx * 0.08 + 0.22);
+          });
+        } else {
+          // Oops low buzz
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, t);
+          osc.frequency.linearRampToValueAtTime(90, t + 0.25);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.26);
+        }
+      }
+
+      playFanfare() {
+        if (!this.soundEnabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const melody = [
+          { f: 523.25, d: 0.12, w: 0 },
+          { f: 523.25, d: 0.12, w: 0.14 },
+          { f: 523.25, d: 0.12, w: 0.28 },
+          { f: 659.25, d: 0.25, w: 0.42 },
+          { f: 783.99, d: 0.25, w: 0.68 },
+          { f: 1046.50, d: 0.5, w: 0.95 }
+        ];
+        melody.forEach(note => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = note.f;
+          gain.gain.setValueAtTime(0.25, t + note.w);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + note.w + note.d);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t + note.w);
+          osc.stop(t + note.w + note.d + 0.05);
+        });
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    /* ========================================================
+       2. MODERN RECIPES CONFIGURATION & STEPS
+    ======================================================== */
+    const RECIPES = [
+      {
+        id: "burger",
+        name: "Truffle Wagyu Smash Burger",
+        desc: "Patty wagyu karamel krispi, keju cheddar meleleh, brioche bun bakar & truffle mayo.",
+        icon: "🍔",
+        tags: ["Hot & Juicy", "Chef Pick"],
+        color: "#F97316",
+        steps: [
+          {
+            type: "chop",
+            title: "Potong Bawang Bombay & Pickle",
+            mamaAdvice: "Cepat! Ketuk garis merah untuk mengiris bawang dengan rapi!",
+            slicesNeeded: 5,
+            ingredientName: "Caramel Onion & Pickle",
+            foodGraphic: "onion"
+          },
+          {
+            type: "sizzle",
+            title: "Smash & Sizzle Wagyu Patty",
+            mamaAdvice: "Tekan tombol Balik tepat saat indikator berada di zona hijau!",
+            sizzleTime: 3.5,
+            foodGraphic: "patty"
+          },
+          {
+            type: "whisk",
+            title: "Aduk Saus Truffle Aioli",
+            mamaAdvice: "Putar kursor memutar cepat searah jarum jam untuk emulsi saus!",
+            rotationsNeeded: 6,
+            foodGraphic: "truffle_sauce"
+          },
+          {
+            type: "plate",
+            title: "Susun Gourmet Smash Burger",
+            mamaAdvice: "Tata bahan ke atas brioche bun untuk kreasi burger modern!",
+            requiredToppings: [
+              { id: "sauce", name: "Truffle Aioli", icon: "🥄", color: "#FEF08A" },
+              { id: "patty", name: "Smashed Patty", icon: "🥩", color: "#854D0E" },
+              { id: "cheese", name: "Melted Cheddar", icon: "🧀", color: "#FBBF24" },
+              { id: "onion", name: "Crispy Onions", icon: "🧅", color: "#FDE68A" },
+              { id: "topbun", name: "Top Brioche", icon: "🍞", color: "#EA580C" }
+            ],
+            targetPlateGraphic: "burger_base"
+          }
+        ]
+      },
+      {
+        id: "toast",
+        name: "Artisan Truffle Avocado Toast",
+        desc: "Roti sourdough panggang, alpukat iris kipas estetik, telur poached setengah matang.",
+        icon: "🥑",
+        tags: ["Café Trendy", "Healthy"],
+        color: "#10B981",
+        steps: [
+          {
+            type: "chop",
+            title: "Iris Kipas Alpukat Mentega",
+            mamaAdvice: "Potong alpukat menjadi irisan tipis kipas yang simetris!",
+            slicesNeeded: 6,
+            ingredientName: "Ripe Avocado",
+            foodGraphic: "avocado"
+          },
+          {
+            type: "sizzle",
+            title: "Panggang Roti Sourdough",
+            mamaAdvice: "Perhatikan tingkat kecokelatan roti, jangan sampai gosong ya!",
+            sizzleTime: 3.2,
+            foodGraphic: "sourdough"
+          },
+          {
+            type: "whisk",
+            title: "Aduk Pusaran Air Poached Egg",
+            mamaAdvice: "Putar air mendidih untuk menciptakan pusaran telur sempurna!",
+            rotationsNeeded: 5,
+            foodGraphic: "whirlpool"
+          },
+          {
+            type: "plate",
+            title: "Garnish Avocado Toast",
+            mamaAdvice: "Taburi topping estetik ala café brunch hits!",
+            requiredToppings: [
+              { id: "cream", name: "Cream Cheese", icon: "🧈", color: "#FFFFFF" },
+              { id: "avo", name: "Avocado Fan", icon: "🥑", color: "#22C55E" },
+              { id: "egg", name: "Poached Egg", icon: "🍳", color: "#FDE047" },
+              { id: "chili", name: "Chili Flakes", icon: "🌶️", color: "#EF4444" },
+              { id: "greens", name: "Microgreens", icon: "🌱", color: "#15803D" }
+            ],
+            targetPlateGraphic: "toast_base"
+          }
+        ]
+      },
+      {
+        id: "poke",
+        name: "Rainbow Salmon Poke Bowl",
+        desc: "Sashimi salmon norwegian segar, edamame, tobiko, saus ponzu wijen & nasi sushi hangat.",
+        icon: "🍣",
+        tags: ["Fresh", "High Protein"],
+        color: "#FB7185",
+        steps: [
+          {
+            type: "chop",
+            title: "Potong Dadu Salmon Sashimi",
+            mamaAdvice: "Potong salmon segar jadi potongan dadu yang rapi!",
+            slicesNeeded: 6,
+            ingredientName: "Norwegian Salmon",
+            foodGraphic: "salmon"
+          },
+          {
+            type: "whisk",
+            title: "Kocok Saus Ponzu Wijen",
+            mamaAdvice: "Aduk minyak wijen dan ponzu sampai menyatu sempurna!",
+            rotationsNeeded: 6,
+            foodGraphic: "ponzu"
+          },
+          {
+            type: "sizzle",
+            title: "Sangrai Biji Wijen & Nori",
+            mamaAdvice: "Sangrai wijen sebentar saja sampai harum keemasan!",
+            sizzleTime: 2.8,
+            foodGraphic: "sesame"
+          },
+          {
+            type: "plate",
+            title: "Tata Poke Bowl Berwarna",
+            mamaAdvice: "Susun warna-warni topping di atas mangkok nasi sushi!",
+            requiredToppings: [
+              { id: "salmon_cubes", name: "Salmon Dadu", icon: "🍣", color: "#FB923C" },
+              { id: "edamame", name: "Edamame", icon: "🫛", color: "#4ADE80" },
+              { id: "avocubes", name: "Alpukat Dadu", icon: "🥑", color: "#22C55E" },
+              { id: "tobiko", name: "Tobiko Orange", icon: "🟠", color: "#EA580C" },
+              { id: "mayo", name: "Spicy Mayo", icon: "🍥", color: "#F472B6" }
+            ],
+            targetPlateGraphic: "bowl_base"
+          }
+        ]
+      },
+      {
+        id: "souffle",
+        name: "Fluffy Matcha Soufflé Pancake",
+        desc: "Pancake Jepang lembut bergoyang (jiggle), matcha cream lumer, boba dan taburan emas.",
+        icon: "🥞",
+        tags: ["Sweet", "Fluffy Dessert"],
+        color: "#A855F7",
+        steps: [
+          {
+            type: "whisk",
+            title: "Kocok Putih Telur Meringue",
+            mamaAdvice: "Putar kencang sampai meringue berbusa kaku (stiff peak)!",
+            rotationsNeeded: 8,
+            foodGraphic: "meringue"
+          },
+          {
+            type: "sizzle",
+            title: "Panggang Soufflé Pancake",
+            mamaAdvice: "Tunggu pancake mengembang lalu balik di saat paling tepat!",
+            sizzleTime: 3.8,
+            foodGraphic: "souffle_pan"
+          },
+          {
+            type: "chop",
+            title: "Potong Stroberi Segar",
+            mamaAdvice: "Iris buah stroberi manis untuk pelengkap pancake!",
+            slicesNeeded: 4,
+            ingredientName: "Fresh Strawberry",
+            foodGraphic: "strawberry"
+          },
+          {
+            type: "plate",
+            title: "Garnish Soufflé Pancake",
+            mamaAdvice: "Tumpuk pancake dan tuang cream matcha yang meleleh!",
+            requiredToppings: [
+              { id: "matcha_cream", name: "Matcha Lava", icon: "🍵", color: "#16A34A" },
+              { id: "boba", name: "Brown Boba", icon: "🧋", color: "#451A03" },
+              { id: "berry", name: "Stroberi Iris", icon: "🍓", color: "#EF4444" },
+              { id: "gold", name: "Edible Gold", icon: "✨", color: "#FBBF24" }
+            ],
+            targetPlateGraphic: "pancake_base"
+          }
+        ]
+      }
+    ];
+
+    /* ========================================================
+       3. GAME ENGINE STATE
+    ======================================================== */
+    const State = {
+      selectedRecipe: RECIPES[0],
+      currentStepIndex: 0,
+      totalScore: 0,
+      stepScore: 0,
+      stepTimer: null,
+      timeLeft: 15,
+      stepActive: false,
+      placedToppings: []
+    };
+
+    /* DOM Elements */
+    const screenLobby = document.getElementById('screen-lobby');
+    const screenGame = document.getElementById('screen-game');
+    const screenResult = document.getElementById('screen-result');
+    const recipeListEl = document.getElementById('recipe-list');
+    const btnStartCook = document.getElementById('btn-start-cook');
+    const btnSound = document.getElementById('btn-sound');
+    const btnRestartRecipe = document.getElementById('btn-restart-recipe');
+    const btnReplay = document.getElementById('btn-replay');
+    const btnMenuBack = document.getElementById('btn-menu-back');
+
+    const mamaSpeechText = document.getElementById('mama-speech-text');
+    const recipeNamePill = document.getElementById('recipe-name-pill');
+    const stepIndicator = document.getElementById('step-indicator');
+    const arenaScore = document.getElementById('arena-score');
+    const arenaTimer = document.getElementById('arena-timer');
+    const minigameContent = document.getElementById('minigame-content');
+    const feedbackPopup = document.getElementById('feedback-popup');
+    const mamaEyes = document.getElementById('mama-eyes');
+    const mamaMouth = document.getElementById('mama-mouth');
+
+    /* ========================================================
+       4. CHEF MAMA EXPRESSIONS
+    ======================================================== */
+    function setMamaMood(mood) {
+      if (mood === 'happy') {
+        mamaEyes.innerHTML = `
+          <path d="M 30 54 Q 34 46 38 54" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 62 54 Q 66 46 70 54" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/>
+        `;
+        mamaMouth.setAttribute('d', 'M 40 64 Q 50 78 60 64');
+      } else if (mood === 'worried') {
+        mamaEyes.innerHTML = `
+          <circle cx="34" cy="52" r="6" fill="#1E293B"/>
+          <circle cx="66" cy="52" r="6" fill="#1E293B"/>
+          <circle cx="36" cy="49" r="2" fill="white"/>
+          <circle cx="68" cy="49" r="2" fill="white"/>
+        `;
+        mamaMouth.setAttribute('d', 'M 42 70 Q 50 62 58 70');
+      } else if (mood === 'sparkle') {
+        mamaEyes.innerHTML = `
+          <!-- Star sparkle eyes -->
+          <polygon points="34,44 36,49 41,51 36,53 34,58 32,53 27,51 32,49" fill="#F59E0B"/>
+          <polygon points="66,44 68,49 73,51 68,53 66,58 64,53 59,51 64,49" fill="#F59E0B"/>
+        `;
+        mamaMouth.setAttribute('d', 'M 38 64 Q 50 82 62 64');
+      } else {
+        // Normal
+        mamaEyes.innerHTML = `
+          <circle cx="34" cy="52" r="5" fill="#1E293B"/>
+          <circle cx="66" cy="52" r="5" fill="#1E293B"/>
+          <circle cx="36" cy="50" r="1.8" fill="white"/>
+          <circle cx="68" cy="50" r="1.8" fill="white"/>
+        `;
+        mamaMouth.setAttribute('d', 'M 42 66 Q 50 75 58 66');
+      }
+    }
+
+    function triggerFeedback(type, text) {
+      sound.playFeedback(type);
+      feedbackPopup.textContent = text || (type === 'perfect' ? 'PERFECT! ✨' : type === 'great' ? 'GREAT! 🌟' : 'OOPS! 💦');
+      feedbackPopup.className = `feedback-popup show feedback-${type}`;
+      
+      if (type === 'perfect') {
+        setMamaMood('sparkle');
+      } else if (type === 'great') {
+        setMamaMood('happy');
+      } else {
+        setMamaMood('worried');
+      }
+
+      setTimeout(() => {
+        feedbackPopup.classList.remove('show');
+        setMamaMood('normal');
+      }, 700);
+    }
+
+    /* ========================================================
+       5. LOBBY SCREEN RENDERING
+    ======================================================== */
+    function renderLobby() {
+      recipeListEl.innerHTML = '';
+      RECIPES.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = `recipe-card ${recipe.id === State.selectedRecipe.id ? 'selected' : ''}`;
+        card.innerHTML = `
+          <div class="recipe-icon">${recipe.icon}</div>
+          <div class="recipe-info">
+            <h3>${recipe.name}</h3>
+            <p>${recipe.desc}</p>
+            <div class="recipe-tags">
+              ${recipe.tags.map(t => `<span class="tag ${t.includes('Hot') ? 'hot' : t.includes('Chef') ? 'chef' : ''}">${t}</span>`).join('')}
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          sound.playPop();
+          document.querySelectorAll('.recipe-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          State.selectedRecipe = recipe;
+        });
+        recipeListEl.appendChild(card);
+      });
+    }
+
+    /* Navigation between screens */
+    function showScreen(screen) {
+      [screenLobby, screenGame, screenResult].forEach(s => s.classList.remove('active'));
+      screen.classList.add('active');
+    }
+
+    /* ========================================================
+       6. GAMEPLAY CONTROLLER & STEP DISPATCHER
+    ======================================================== */
+    function startGame() {
+      State.currentStepIndex = 0;
+      State.totalScore = 0;
+      showScreen(screenGame);
+      recipeNamePill.textContent = `• ${State.selectedRecipe.name}`;
+      loadStep();
+    }
+
+    function loadStep() {
+      clearInterval(State.stepTimer);
+      const recipe = State.selectedRecipe;
+      const step = recipe.steps[State.currentStepIndex];
+
+      stepIndicator.textContent = `Langkah ${State.currentStepIndex + 1}/${recipe.steps.length}`;
+      mamaSpeechText.textContent = step.mamaAdvice;
+      arenaScore.textContent = State.totalScore;
+      
+      State.timeLeft = 15;
+      arenaTimer.textContent = `${State.timeLeft}s`;
+      arenaTimer.style.color = '#DC2626';
+
+      minigameContent.innerHTML = '';
+      State.stepActive = true;
+
+      // Start Countdown Timer
+      State.stepTimer = setInterval(() => {
+        State.timeLeft--;
+        arenaTimer.textContent = `${State.timeLeft}s`;
+        if (State.timeLeft <= 0) {
+          clearInterval(State.stepTimer);
+          if (State.stepActive) {
+            triggerFeedback('oops', 'WAKTU HABIS! ⏱️');
+            setTimeout(() => advanceStep(50), 900);
+          }
+        }
+      }, 1000);
+
+      // Dispatch specific mini game renderer
+      if (step.type === 'chop') {
+        renderChopMinigame(step);
+      } else if (step.type === 'sizzle') {
+        renderSizzleMinigame(step);
+      } else if (step.type === 'whisk') {
+        renderWhiskMinigame(step);
+      } else if (step.type === 'plate') {
+        renderPlateMinigame(step);
+      }
+    }
+
+    function advanceStep(pointsAwarded) {
+      State.stepActive = false;
+      clearInterval(State.stepTimer);
+      State.totalScore += Math.round(pointsAwarded);
+      arenaScore.textContent = State.totalScore;
+
+      State.currentStepIndex++;
+      if (State.currentStepIndex < State.selectedRecipe.steps.length) {
+        setTimeout(() => loadStep(), 600);
+      } else {
+        setTimeout(() => showResultScreen(), 800);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 1: CHOPPING BOARD (TAP / SLICE)
+    ======================================================== */
+    function renderChopMinigame(step) {
+      let cutCount = 0;
+      const needed = step.slicesNeeded;
+
+      minigameContent.innerHTML = `
+        <div class="board-container">
+          <div class="cutting-board" id="cutting-board-el">
+            <div class="ingredient-target" id="ingredient-el">
+              ${getIngredientSVG(step.foodGraphic, 0)}
+            </div>
+            <div class="cut-line" id="cut-guideline" style="left: 45%;"></div>
+            <div class="stir-prompt">Ketuk atau klik pada garis merah untuk memotong! 🔪</div>
+          </div>
+        </div>
+      `;
+
+      const boardEl = document.getElementById('cutting-board-el');
+      const ingredientEl = document.getElementById('ingredient-el');
+      const guideLine = document.getElementById('cut-guideline');
+
+      function updateGuideline() {
+        const pct = 25 + (cutCount / needed) * 50;
+        guideLine.style.left = `${pct}%`;
+      }
+
+      function doChop() {
+        if (!State.stepActive) return;
+        cutCount++;
+        sound.playChop();
+
+        // Shake effect
+        ingredientEl.style.transform = 'scale(0.94) translateY(4px)';
+        setTimeout(() => {
+          ingredientEl.style.transform = 'scale(1) translateY(0)';
+        }, 80);
+
+        ingredientEl.innerHTML = getIngredientSVG(step.foodGraphic, cutCount);
+        updateGuideline();
+
+        if (cutCount >= needed) {
+          guideLine.style.display = 'none';
+          triggerFeedback('perfect', 'POTONGAN SEMPURNA! ✨');
+          advanceStep(100);
+        } else {
+          triggerFeedback('great', 'CHOP! 🔪');
+        }
+      }
+
+      boardEl.addEventListener('pointerdown', doChop);
+    }
+
+    /* SVG Graphics generator for cutting */
+    function getIngredientSVG(name, cuts) {
+      if (name === 'avocado') {
+        return `
+          <svg width="220" height="150" viewBox="0 0 220 150">
+            <path d="M 30 75 Q 30 20 110 20 Q 190 20 190 75 Q 190 130 110 130 Q 30 130 30 75 Z" fill="#14532D"/>
+            <path d="M 40 75 Q 40 30 110 30 Q 180 30 180 75 Q 180 120 110 120 Q 40 120 40 75 Z" fill="#86EFAC"/>
+            <path d="M 55 75 Q 55 40 110 40 Q 165 40 165 75 Q 165 110 110 110 Q 55 110 55 75 Z" fill="#BBF7D0"/>
+            <circle cx="110" cy="75" r="28" fill="#78350F" stroke="#451A03" stroke-width="3"/>
+            <!-- Slices lines rendered based on cuts -->
+            ${Array.from({length: cuts}).map((_, i) => `<line x1="${50 + i * 20}" y1="30" x2="${50 + i * 20}" y2="120" stroke="#166534" stroke-width="3"/>`).join('')}
+          </svg>
+        `;
+      } else if (name === 'salmon') {
+        return `
+          <svg width="230" height="130" viewBox="0 0 230 130">
+            <rect x="25" y="25" width="180" height="80" rx="15" fill="#FB923C" stroke="#EA580C" stroke-width="4"/>
+            <!-- Salmon white fat stripes -->
+            <path d="M 45 25 L 85 105" stroke="#FFEDD5" stroke-width="5" stroke-linecap="round"/>
+            <path d="M 85 25 L 125 105" stroke="#FFEDD5" stroke-width="5" stroke-linecap="round"/>
+            <path d="M 125 25 L 165 105" stroke="#FFEDD5" stroke-width="5" stroke-linecap="round"/>
+            ${Array.from({length: cuts}).map((_, i) => `<line x1="${40 + i * 26}" y1="20" x2="${40 + i * 26}" y2="110" stroke="#7C2D12" stroke-width="3" stroke-dasharray="4,2"/>`).join('')}
+          </svg>
+        `;
+      } else if (name === 'strawberry') {
+        return `
+          <svg width="180" height="150" viewBox="0 0 180 150">
+            <path d="M 90 130 C 40 100 30 50 50 30 C 70 10 110 10 130 30 C 150 50 140 100 90 130 Z" fill="#EF4444" stroke="#B91C1C" stroke-width="4"/>
+            <!-- Leaves -->
+            <path d="M 90 25 L 70 8 L 85 20 L 90 5 L 95 20 L 110 8 Z" fill="#22C55E"/>
+            ${Array.from({length: cuts}).map((_, i) => `<line x1="40" y1="${35 + i * 22}" x2="140" y2="${35 + i * 22}" stroke="#7F1D1D" stroke-width="3"/>`).join('')}
+          </svg>
+        `;
+      } else {
+        // Onion
+        return `
+          <svg width="200" height="150" viewBox="0 0 200 150">
+            <circle cx="100" cy="75" r="55" fill="#FDE68A" stroke="#D97706" stroke-width="4"/>
+            <circle cx="100" cy="75" r="42" fill="#FEF3C7" stroke="#F59E0B" stroke-width="3"/>
+            <circle cx="100" cy="75" r="28" fill="#FFFBEB" stroke="#FBBF24" stroke-width="2"/>
+            ${Array.from({length: cuts}).map((_, i) => `<line x1="${60 + i * 18}" y1="30" x2="${60 + i * 18}" y2="120" stroke="#B45309" stroke-width="3"/>`).join('')}
+          </svg>
+        `;
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 2: SEARING & FLIP METER
+    ======================================================== */
+    function renderSizzleMinigame(step) {
+      let isFlipped = false;
+      let indicatorPos = 0;
+      let direction = 1;
+      let animId = null;
+
+      minigameContent.innerHTML = `
+        <div class="pan-stove">
+          <div class="skillet">
+            <div class="skillet-handle"></div>
+            <div class="sizzle-smoke">
+              <div class="smoke-puff" style="left:40%; animation-delay:0s"></div>
+              <div class="smoke-puff" style="left:55%; animation-delay:0.4s"></div>
+              <div class="smoke-puff" style="left:48%; animation-delay:0.8s"></div>
+            </div>
+            <div id="skillet-food" style="transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+              ${getCookFoodSVG(step.foodGraphic, false)}
+            </div>
+          </div>
+
+          <div class="meter-container">
+            <div style="font-family:'Fredoka', cursive; font-size:0.95rem; color:#7C2D12; font-weight:600;">
+              Tekan "BALIK SEKARANG!" saat di zona hijau!
+            </div>
+            <div class="meter-bar">
+              <div class="meter-zone-perfect"></div>
+              <div class="meter-indicator" id="flip-indicator"></div>
+            </div>
+            <button class="btn-main" id="btn-flip-now" style="padding: 8px 30px; font-size: 1.1rem; margin-top:4px;">
+              BALIK SEKARANG! 🍳
+            </button>
+          </div>
+        </div>
+      `;
+
+      const indicator = document.getElementById('flip-indicator');
+      const foodItem = document.getElementById('skillet-food');
+      const btnFlip = document.getElementById('btn-flip-now');
+
+      // Continuous Sizzle SFX while on pan
+      sound.playSizzle(2.5);
+
+      function moveIndicator() {
+        if (!State.stepActive) return;
+        indicatorPos += direction * 1.6;
+        if (indicatorPos >= 98) {
+          direction = -1;
+        } else if (indicatorPos <= 2) {
+          direction = 1;
+        }
+        indicator.style.left = `${indicatorPos}%`;
+        animId = requestAnimationFrame(moveIndicator);
+      }
+      animId = requestAnimationFrame(moveIndicator);
+
+      btnFlip.addEventListener('click', () => {
+        if (!State.stepActive || isFlipped) return;
+        isFlipped = true;
+        cancelAnimationFrame(animId);
+        sound.playFlip();
+
+        // 3D Flip animation
+        foodItem.style.transform = 'scale(1.2) rotateY(180deg)';
+        setTimeout(() => {
+          foodItem.innerHTML = getCookFoodSVG(step.foodGraphic, true);
+          foodItem.style.transform = 'scale(1) rotateY(0deg)';
+        }, 150);
+
+        // Check zone (Zone is 65% to 85%)
+        if (indicatorPos >= 65 && indicatorPos <= 85) {
+          triggerFeedback('perfect', 'SEMPURNA! GOLDEN BROWN! ✨');
+          advanceStep(100);
+        } else if (indicatorPos >= 50 && indicatorPos <= 95) {
+          triggerFeedback('great', 'BAGUS SEKALI! 🌟');
+          advanceStep(80);
+        } else {
+          triggerFeedback('oops', 'TERLALU CEPAT/LAMBAT! 💦');
+          advanceStep(50);
+        }
+      });
+    }
+
+    function getCookFoodSVG(name, cooked) {
+      if (name === 'patty') {
+        const color = cooked ? '#451A03' : '#991B1B';
+        const grillMark = cooked ? `<line x1="30" y1="50" x2="110" y2="90" stroke="#291004" stroke-width="4"/><line x1="40" y1="30" x2="120" y2="70" stroke="#291004" stroke-width="4"/>` : '';
+        return `
+          <svg width="150" height="150" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="55" fill="${color}" stroke="#291004" stroke-width="4"/>
+            ${grillMark}
+          </svg>
+        `;
+      } else if (name === 'sourdough') {
+        const color = cooked ? '#B45309' : '#FEF3C7';
+        return `
+          <svg width="150" height="150" viewBox="0 0 150 150">
+            <path d="M 30 110 L 30 65 Q 75 20 120 65 L 120 110 Z" fill="${color}" stroke="#78350F" stroke-width="4"/>
+          </svg>
+        `;
+      } else if (name === 'souffle_pan') {
+        const topColor = cooked ? '#D97706' : '#FEF3C7';
+        return `
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <ellipse cx="80" cy="85" rx="55" ry="40" fill="${topColor}" stroke="#92400E" stroke-width="4"/>
+            <ellipse cx="80" cy="70" rx="55" ry="30" fill="${topColor}" stroke="#92400E" stroke-width="3"/>
+          </svg>
+        `;
+      } else {
+        // Sesame seeds roasting
+        return `
+          <svg width="150" height="150" viewBox="0 0 150 150">
+            <ellipse cx="50" cy="60" rx="5" ry="10" fill="${cooked ? '#78350F' : '#FEF08A'}" transform="rotate(30 50 60)"/>
+            <ellipse cx="90" cy="55" rx="5" ry="10" fill="${cooked ? '#78350F' : '#FEF08A'}" transform="rotate(-20 90 55)"/>
+            <ellipse cx="75" cy="90" rx="5" ry="10" fill="${cooked ? '#78350F' : '#FEF08A'}" transform="rotate(45 75 90)"/>
+            <ellipse cx="105" cy="85" rx="5" ry="10" fill="${cooked ? '#78350F' : '#FEF08A'}" transform="rotate(-60 105 85)"/>
+          </svg>
+        `;
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 3: WHISKING & STIRRING (CIRCULAR GESTURE)
+    ======================================================== */
+    function renderWhiskMinigame(step) {
+      let totalAngleTurned = 0;
+      let lastAngle = null;
+      const targetAngle = step.rotationsNeeded * 360;
+
+      minigameContent.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div class="stir-prompt">Putar melingkar kursor atau jarimu di dalam mangkuk! 🥣</div>
+          <div class="bowl-container" id="stir-bowl">
+            <div class="batter-liquid" id="batter-el">
+              <div class="swirl-ripple"></div>
+              <div id="whisk-center-icon" style="font-size:3.5rem;">🥄</div>
+            </div>
+          </div>
+          <div style="font-family:'Fredoka', cursive; font-size:1.1rem; color:#0369A1;">
+            Progres Aduk: <b id="whisk-progress-text">0%</b>
+          </div>
+        </div>
+      `;
+
+      const bowl = document.getElementById('stir-bowl');
+      const batter = document.getElementById('batter-el');
+      const progressText = document.getElementById('whisk-progress-text');
+
+      // Theme-specific liquid colors
+      if (step.foodGraphic === 'truffle_sauce') {
+        batter.style.background = 'radial-gradient(circle, #FEF08A 30%, #F59E0B 90%)';
+      } else if (step.foodGraphic === 'ponzu') {
+        batter.style.background = 'radial-gradient(circle, #78350F 30%, #3B1B06 90%)';
+      } else if (step.foodGraphic === 'meringue') {
+        batter.style.background = 'radial-gradient(circle, #FFFFFF 40%, #E2E8F0 90%)';
+      } else if (step.foodGraphic === 'whirlpool') {
+        batter.style.background = 'radial-gradient(circle, #BAE6FD 30%, #0284C7 90%)';
+      }
+
+      function handleMove(e) {
+        if (!State.stepActive) return;
+        const rect = bowl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (!clientX || !clientY) return;
+
+        const currentAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+
+        if (lastAngle !== null) {
+          let delta = currentAngle - lastAngle;
+          if (delta > 180) delta -= 360;
+          if (delta < -180) delta += 360;
+
+          // Only count forward turns
+          if (delta > 0) {
+            totalAngleTurned += delta;
+            sound.playSwish();
+            const pct = Math.min(100, Math.round((totalAngleTurned / targetAngle) * 100));
+            progressText.textContent = `${pct}%`;
+            batter.style.transform = `rotate(${totalAngleTurned * 1.5}deg) scale(${1 + (pct/1000)})`;
+
+            if (totalAngleTurned >= targetAngle) {
+              triggerFeedback('perfect', 'EMULSI TERCAMPUR SEMPURNA! ✨');
+              advanceStep(100);
+            }
+          }
+        }
+        lastAngle = currentAngle;
+      }
+
+      function resetAngle() {
+        lastAngle = null;
+      }
+
+      bowl.addEventListener('pointermove', handleMove);
+      bowl.addEventListener('pointerleave', resetAngle);
+      bowl.addEventListener('pointerup', resetAngle);
+    }
+
+    /* ========================================================
+       MINI-GAME 4: PLATING & TOPPING
+    ======================================================== */
+    function renderPlateMinigame(step) {
+      State.placedToppings = [];
+      const neededCount = step.requiredToppings.length;
+
+      minigameContent.innerHTML = `
+        <div class="plate-station">
+          <div class="stir-prompt">Ketuk atau klik topping untuk menghias piring saji! 🌿</div>
+
+          <div class="gourmet-plate">
+            <div class="plate-food-assembly" id="plate-target">
+              ${getBasePlateGraphic(step.targetPlateGraphic)}
+            </div>
+          </div>
+
+          <div class="toppings-dock" id="toppings-container">
+            ${step.requiredToppings.map(t => `
+              <div class="topping-item" data-id="${t.id}" id="topping-${t.id}">
+                <span style="font-size: 1.8rem;">${t.icon}</span>
+                <span>${t.name}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const plateTarget = document.getElementById('plate-target');
+      const toppingButtons = document.querySelectorAll('.topping-item');
+
+      toppingButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!State.stepActive) return;
+          const id = btn.getAttribute('data-id');
+          if (State.placedToppings.includes(id)) return;
+
+          State.placedToppings.push(id);
+          btn.classList.add('placed');
+          sound.playPop();
+
+          // Render topping on plate with bouncy scale
+          const topElem = document.createElement('div');
+          topElem.style.position = 'absolute';
+          topElem.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          topElem.style.transform = 'scale(0.2)';
+          topElem.innerHTML = getGarnishSVG(id);
+          plateTarget.appendChild(topElem);
+
+          setTimeout(() => {
+            topElem.style.transform = 'scale(1)';
+          }, 30);
+
+          if (State.placedToppings.length >= neededCount) {
+            triggerFeedback('perfect', 'PLATING MASTERPIECE! 🌟');
+            advanceStep(100);
+          } else {
+            triggerFeedback('great', 'CANTIK! ✨');
+          }
+        });
+      });
+    }
+
+    function getBasePlateGraphic(type) {
+      if (type === 'burger_base') {
+        return `
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <!-- Bottom Bun -->
+            <path d="M 30 130 C 30 150 150 150 150 130 L 150 120 L 30 120 Z" fill="#D97706" stroke="#92400E" stroke-width="4"/>
+          </svg>
+        `;
+      } else if (type === 'toast_base') {
+        return `
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <path d="M 35 140 L 35 70 Q 90 20 145 70 L 145 140 Z" fill="#D97706" stroke="#92400E" stroke-width="4"/>
+            <path d="M 45 130 L 45 75 Q 90 35 135 75 L 135 130 Z" fill="#FEF3C7"/>
+          </svg>
+        `;
+      } else if (type === 'bowl_base') {
+        return `
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <ellipse cx="90" cy="110" rx="75" ry="45" fill="#334155" stroke="#0F172A" stroke-width="4"/>
+            <ellipse cx="90" cy="95" rx="65" ry="35" fill="#FFFFFF"/>
+            <!-- Sushi Rice -->
+            <ellipse cx="90" cy="95" rx="55" ry="28" fill="#F8FAFC"/>
+          </svg>
+        `;
+      } else {
+        // Pancake Base
+        return `
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <ellipse cx="90" cy="120" rx="65" ry="28" fill="#D97706" stroke="#92400E" stroke-width="3"/>
+            <ellipse cx="90" cy="95" rx="60" ry="26" fill="#F59E0B" stroke="#92400E" stroke-width="3"/>
+          </svg>
+        `;
+      }
+    }
+
+    function getGarnishSVG(id) {
+      if (id === 'patty') {
+        return `<circle cx="0" cy="0" r="45" fill="#451A03" stroke="#291004" stroke-width="3"/>`;
+      } else if (id === 'cheese') {
+        return `<path d="M -40 -15 L 40 -15 L 30 25 L -30 25 Z" fill="#FBBF24" stroke="#D97706" stroke-width="2"/>`;
+      } else if (id === 'topbun') {
+        return `<path d="M -50 0 C -50 -55 50 -55 50 0 Z" fill="#D97706" stroke="#92400E" stroke-width="3"/><circle cx="-20" cy="-25" r="2" fill="#FEF08A"/><circle cx="15" cy="-30" r="2" fill="#FEF08A"/>`;
+      } else if (id === 'avo') {
+        return `<path d="M -35 0 Q 0 -30 35 0 Q 0 30 -35 0 Z" fill="#22C55E"/>`;
+      } else if (id === 'egg') {
+        return `<circle cx="0" cy="0" r="28" fill="white" stroke="#CBD5E1" stroke-width="2"/><circle cx="0" cy="0" r="16" fill="#FBBF24"/>`;
+      } else if (id === 'matcha_cream') {
+        return `<path d="M -45 -10 Q 0 -35 45 -10 Q 40 35 0 20 Q -40 35 -45 -10 Z" fill="#16A34A" opacity="0.9"/>`;
+      } else if (id === 'boba') {
+        return `<circle cx="-15" cy="5" r="7" fill="#291004"/><circle cx="5" cy="15" r="8" fill="#291004"/><circle cx="18" cy="0" r="6" fill="#291004"/>`;
+      } else {
+        return `<circle cx="0" cy="0" r="18" fill="#EF4444" opacity="0.9"/>`;
+      }
+    }
+
+    /* ========================================================
+       7. RESULT & EVALUATION SCREEN
+    ======================================================== */
+    function showResultScreen() {
+      showScreen(screenResult);
+      sound.playFanfare();
+      launchConfetti();
+
+      const recipe = State.selectedRecipe;
+      const maxPossibleScore = recipe.steps.length * 100;
+      const scorePct = Math.min(100, Math.round((State.totalScore / maxPossibleScore) * 100));
+
+      document.getElementById('result-dish-title').textContent = recipe.name;
+      document.getElementById('result-score-percent').textContent = `${scorePct}%`;
+
+      // Set Final Photograph SVG
+      const photoEl = document.getElementById('polaroid-food-photo');
+      photoEl.innerHTML = `
+        <div style="transform: scale(1.3); display:flex; align-items:center; justify-content:center;">
+          ${getBasePlateGraphic(recipe.steps[recipe.steps.length - 1].targetPlateGraphic || 'burger_base')}
+        </div>
+      `;
+
+      // Stars
+      const starElements = document.querySelectorAll('#result-stars .star-icon');
+      starElements.forEach(s => s.classList.remove('earned'));
+
+      let starsEarned = 1;
+      if (scorePct >= 90) starsEarned = 3;
+      else if (scorePct >= 70) starsEarned = 2;
+
+      for (let i = 0; i < starsEarned; i++) {
+        setTimeout(() => {
+          starElements[i].classList.add('earned');
+          sound.playPop();
+        }, (i + 1) * 350);
+      }
+
+      // Mama Verdict Comment
+      const commentEl = document.getElementById('result-mama-comment');
+      const stampEl = document.getElementById('chef-stamp');
+
+      if (starsEarned === 3) {
+        stampEl.textContent = "MASTER CHEF ⭐";
+        stampEl.style.borderColor = "#16A34A";
+        stampEl.style.color = "#16A34A";
+        stampEl.style.background = "#DCFCE7";
+        commentEl.textContent = `"Even better than Mama! Hidangan ${recipe.name} buatanmu sangat memukau, layak disajikan di restoran Michelin café!"`;
+      } else if (starsEarned === 2) {
+        stampEl.textContent = "GOOD TASTE 👍";
+        stampEl.style.borderColor = "#D97706";
+        stampEl.style.color = "#D97706";
+        stampEl.style.background = "#FEF3C7";
+        commentEl.textContent = `"Kerja bagus! Rasanya lezat sekali, sedikit latihan lagi dan kamu akan mengalahkan Mama!"`;
+      } else {
+        stampEl.textContent = "KEEP COOKING 🍳";
+        stampEl.style.borderColor = "#DC2626";
+        commentEl.textContent = `"Jangan menyerah! Mama selalu siap membantumu mencoba lagi sampai sempurna!"`;
+      }
+    }
+
+    /* ========================================================
+       8. CONFETTI CELEBRATION EFFECT
+    ======================================================== */
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+
+      const particles = [];
+      const colors = ['#F97316', '#FBBF24', '#10B981', '#38BDF8', '#EC4899', '#A855F7'];
+
+      for (let i = 0; i < 70; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.8) * 16,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // gravity
+          p.rot += p.vrot;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frames++;
+        if (frames < 90) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+
+    /* ========================================================
+       9. INITIALIZATION & EVENT LISTENERS
+    ======================================================== */
+    btnStartCook.addEventListener('click', () => {
+      sound.playPop();
+      startGame();
+    });
+
+    btnSound.addEventListener('click', () => {
+      const active = sound.toggleSound();
+      btnSound.textContent = active ? '🔊' : '🔇';
+    });
+
+    btnRestartRecipe.addEventListener('click', () => {
+      sound.playPop();
+      clearInterval(State.stepTimer);
+      showScreen(screenLobby);
+    });
+
+    btnReplay.addEventListener('click', () => {
+      sound.playPop();
+      startGame();
+    });
+
+    btnMenuBack.addEventListener('click', () => {
+      sound.playPop();
+      showScreen(screenLobby);
+    });
+
+    // Initial render
+    renderLobby();
+  </script>
+</body>
+</html>
