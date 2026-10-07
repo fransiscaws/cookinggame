@@ -144,9 +144,15 @@ class FirebaseSyncEngine {
       console.log("🔥 Firebase terhubung sebagai:", this.currentUser.uid);
       await this.syncWithCloud();
     } catch (err) {
-      console.warn("Koneksi Firebase Cloud tidak dapat terhubung, melanjutkan mode lokal aman:", err.message);
+      console.warn("Koneksi Firebase Cloud tidak dapat terhubung, melanjutkan mode lokal aman:", err);
       this.isCloudActive = false;
-      this.statusMessage = "Mode Penyimpanan Lokal (Offline)";
+      if (err.code === 'auth/operation-not-allowed' || err.code === 'auth/admin-restricted-operation') {
+        this.statusMessage = "Aktifkan Anonymous Auth di Firebase Console";
+      } else if (err.code === 'permission-denied') {
+        this.statusMessage = "Periksa Security Rules di Firebase Console";
+      } else {
+        this.statusMessage = "Mode Penyimpanan Lokal (Offline)";
+      }
     }
 
     this.notifyListeners();
