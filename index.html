@@ -973,7 +973,27 @@
       z-index: 99;
     }
 
-    /* Chef Profile & Cloud Status Badge */
+    /* Chef Profile & Points Badges in Header */
+    .header-points-badge {
+      background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+      border: 2px solid #F59E0B;
+      border-radius: 30px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Fredoka', cursive;
+      font-weight: 700;
+      color: #92400E;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+      animation: floatGentle 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatGentle {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-2px); }
+    }
+
     .chef-profile-pill {
       background: white;
       border: 2px solid #FED7AA;
@@ -996,6 +1016,17 @@
       background: #FFF7ED;
     }
 
+    .btn-save-quick {
+      background: #ECFDF5;
+      border-color: #6EE7B7;
+      color: #047857;
+    }
+
+    .btn-save-quick:hover {
+      background: #D1FAE5;
+      border-color: #10B981;
+    }
+
     .cloud-dot {
       width: 10px;
       height: 10px;
@@ -1015,6 +1046,283 @@
     @keyframes pulseGlow {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.6; transform: scale(1.25); }
+    }
+
+    /* ---------------------------------
+       LOBBY PLAYER PROFILE & POINTS CARD
+    --------------------------------- */
+    .lobby-chef-card {
+      width: 100%;
+      max-width: 760px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 247, 237, 0.9));
+      border: 2.5px solid #FED7AA;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-top: 10px;
+      box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .chef-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chef-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .chef-card-avatar {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #FFEDD5, #FDBA74);
+      border: 2.5px solid #EA580C;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+      flex-shrink: 0;
+    }
+
+    .chef-card-name-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .chef-card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #9A3412;
+    }
+
+    .chef-name-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lobby-name-input {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #1E293B;
+      padding: 5px 12px;
+      border: 2px solid #FED7AA;
+      border-radius: 10px;
+      background: white;
+      outline: none;
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 220px;
+    }
+
+    .lobby-name-input:focus {
+      border-color: #EA580C;
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+    }
+
+    .btn-save-name-badge {
+      background: #EA580C;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-family: 'Fredoka', cursive;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+    }
+
+    .btn-save-name-badge:hover {
+      background: #C2410C;
+      transform: translateY(-1px);
+    }
+
+    .chef-rank-pill {
+      background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+      border: 1.5px solid #F59E0B;
+      border-radius: 20px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Fredoka', cursive;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #92400E;
+    }
+
+    .chef-stats-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 580px) {
+      .chef-stats-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chef-stat-item {
+      background: white;
+      border: 1.5px solid #FFEDD5;
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+      transition: transform 0.2s;
+    }
+
+    .chef-stat-item:hover {
+      transform: translateY(-2px);
+      border-color: #FDBA74;
+    }
+
+    .chef-stat-item .stat-icon {
+      font-size: 1.5rem;
+    }
+
+    .chef-stat-item .stat-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chef-stat-item .stat-number {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #EA580C;
+      line-height: 1.1;
+    }
+
+    .chef-stat-item .stat-caption {
+      font-size: 0.75rem;
+      color: #64748B;
+      font-weight: 500;
+    }
+
+    .chef-level-progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748B;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #F1F5F9;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #CBD5E1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #F59E0B, #EA580C);
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .chef-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+      border-top: 1px dashed #FED7AA;
+    }
+
+    .chef-card-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-chef-action {
+      background: white;
+      border: 2px solid #FED7AA;
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-family: 'Fredoka', cursive;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-chef-action:hover {
+      background: #FFF7ED;
+      border-color: #EA580C;
+      color: #EA580C;
+      transform: translateY(-1px);
+    }
+
+    .btn-chef-action.primary {
+      background: #10B981;
+      border-color: #059669;
+      color: white;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-chef-action.primary:hover {
+      background: #059669;
+      color: white;
+    }
+
+    .chef-save-info {
+      font-size: 0.78rem;
+      color: #059669;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ECFDF5;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #A7F3D0;
+    }
+
+    .save-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
     }
 
     /* Recipe Saved Progress Badges */
@@ -1041,16 +1349,79 @@
       font-weight: 700;
     }
 
+    /* Result Screen Certificate Card */
+    .result-score-certificate {
+      background: white;
+      border: 2px solid #FED7AA;
+      border-radius: 16px;
+      padding: 12px 18px;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cert-chef-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Fredoka', cursive;
+      font-size: 1rem;
+      color: #1E293B;
+      border-bottom: 1px dashed #FED7AA;
+      padding-bottom: 6px;
+    }
+
+    .cert-rank-badge {
+      background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+      border: 1.5px solid #F59E0B;
+      color: #92400E;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .cert-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .cert-stat-box {
+      background: #FFF7ED;
+      border-radius: 10px;
+      padding: 6px;
+    }
+
+    .cert-stat-label {
+      font-size: 0.72rem;
+      color: #64748B;
+      display: block;
+      font-weight: 600;
+    }
+
+    .cert-stat-val {
+      font-family: 'Fredoka', cursive;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #EA580C;
+    }
+
     /* Cloud Sync Notification on Result Screen */
     .result-sync-status {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: #065F46;
       background: #D1FAE5;
       border: 1.5px solid #6EE7B7;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
-      margin-top: 8px;
+      margin-top: 6px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -1072,15 +1443,15 @@
 
     .modal-card {
       background: white;
-      width: 90%;
-      max-width: 480px;
+      width: 92%;
+      max-width: 520px;
       border-radius: var(--radius-lg);
       border: 3px solid #FED7AA;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      max-height: 85vh;
+      max-height: 88vh;
     }
 
     .modal-header {
@@ -1131,8 +1502,8 @@
       font-family: 'Fredoka', cursive;
       font-size: 0.95rem;
       color: #64748B;
-      padding: 6px 12px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -1140,7 +1511,34 @@
     .modal-tab.active {
       background: #FFF7ED;
       color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(249, 115, 22, 0.1);
+    }
+
+    .leaderboard-header-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      background: #FFF7ED;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #FED7AA;
+    }
+
+    .btn-refresh-pill {
+      background: white;
+      border: 1px solid #FED7AA;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
       font-weight: 600;
+      cursor: pointer;
+      color: #EA580C;
+    }
+
+    .btn-refresh-pill:hover {
+      background: #FED7AA;
     }
 
     .input-group label {
@@ -1220,8 +1618,9 @@
       padding: 3px 10px;
       border-radius: 20px;
       font-size: 0.8rem;
-      background: #FEF3C7;
-      color: #D97706;
+      background: #DCFCE7;
+      color: #16A34A;
+      font-weight: 600;
     }
 
     .status-badge.online {
@@ -1243,29 +1642,142 @@
       color: #92400E;
     }
 
+    /* Leaderboard Styling */
     .leaderboard-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 280px;
+      max-height: 290px;
       overflow-y: auto;
+      padding-right: 4px;
     }
 
     .leaderboard-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #FFF7ED;
-      border: 1px solid #FED7AA;
+      background: white;
+      border: 1.5px solid #FED7AA;
       padding: 8px 14px;
       border-radius: 12px;
       font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .leaderboard-item:hover {
+      transform: translateX(2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .leaderboard-item.rank-1 {
+      background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+      border-color: #F59E0B;
+      border-width: 2px;
+    }
+
+    .leaderboard-item.rank-2 {
+      background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+      border-color: #94A3B8;
+    }
+
+    .leaderboard-item.rank-3 {
+      background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+      border-color: #F97316;
+    }
+
+    .leaderboard-item.is-player {
+      background: linear-gradient(135deg, #ECFDF5, #DCFCE7) !important;
+      border: 2px solid #10B981 !important;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
     }
 
     .leaderboard-rank {
+      font-family: 'Fredoka', cursive;
       font-weight: 700;
       color: var(--primary);
-      width: 24px;
+      width: 32px;
+      font-size: 1.05rem;
+    }
+
+    .player-tag {
+      background: #10B981;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+    }
+
+    .player-rank-sticky-bar {
+      margin-top: 12px;
+      background: #1E293B;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .sticky-badge {
+      background: #10B981;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .sticky-rank-pill {
+      background: #EA580C;
+      color: white;
+      font-family: 'Fredoka', cursive;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-left: 8px;
+    }
+
+    /* Floating Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      background: #1E293B;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-family: 'Fredoka', cursive;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 2px solid #F59E0B;
+      pointer-events: all;
+      animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1), fadeOutToast 0.4s ease 2.6s forwards;
+    }
+
+    @keyframes slideInUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeOutToast {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-10px); }
     }
   </style>
 </head>
@@ -1279,12 +1791,19 @@
         <span class="brand-badge">Gourmet Edition</span>
       </div>
       <div class="header-actions">
-        <button class="chef-profile-pill" id="btn-chef-profile" title="Profil Koki & Status Cloud Firebase">
+        <!-- Header Total Points Badge -->
+        <div class="header-points-badge" id="header-points-badge" title="Total Poin Akumulasi Koki">
+          <span>🪙</span>
+          <span id="header-total-points-display">0</span>
+          <span style="font-size:0.75rem; color:#EA580C; font-weight:700;">PTS</span>
+        </div>
+        <button class="chef-profile-pill" id="btn-chef-profile" title="Profil Koki & Penyimpanan Data">
           <span class="chef-icon">👨‍🍳</span>
           <span class="chef-name" id="header-chef-name">Chef Gourmet</span>
-          <span class="cloud-dot" id="header-cloud-dot" title="Status Firebase"></span>
+          <span class="cloud-dot" id="header-cloud-dot" title="Status Penyimpanan Data"></span>
         </button>
-        <button class="icon-btn" id="btn-leaderboard" title="Papan Peringkat Global">🏆</button>
+        <button class="icon-btn btn-save-quick" id="btn-header-quick-save" title="Simpan Permainan Sekarang">💾</button>
+        <button class="icon-btn" id="btn-leaderboard" title="Papan Peringkat Koki (Leaderboard)">🏆</button>
         <button class="icon-btn" id="btn-sound" title="Toggle Suara">🔊</button>
         <button class="icon-btn" id="btn-restart-recipe" title="Pilih Resep Lain">📋</button>
       </div>
@@ -1298,6 +1817,78 @@
         <div class="hero-banner">
           <h1 class="hero-title">Pilih Menu Modern Café! ✨</h1>
           <p class="hero-subtitle">Bantu Mama memasak makanan kekinian dengan cita rasa gourmet dan plating bintang 5!</p>
+        </div>
+
+        <!-- Kartu Profil & Poin Koki Pemain -->
+        <div class="lobby-chef-card">
+          <div class="chef-card-header">
+            <div class="chef-card-left">
+              <div class="chef-card-avatar">👨‍🍳</div>
+              <div class="chef-card-name-wrap">
+                <label class="chef-card-label" for="lobby-chef-name-input">Nama Koki Anda:</label>
+                <div class="chef-name-input-group">
+                  <input type="text" id="lobby-chef-name-input" class="lobby-name-input" maxlength="20" placeholder="Ketik nama koki...">
+                  <button id="btn-lobby-save-name" class="btn-save-name-badge" title="Simpan Nama Koki">💾 Simpan Nama</button>
+                </div>
+              </div>
+            </div>
+            <div class="chef-rank-pill" id="lobby-rank-tier-pill">
+              <span id="lobby-rank-icon">🍳</span>
+              <span id="lobby-rank-title">Koki Magang</span>
+            </div>
+          </div>
+
+          <!-- Ringkasan Statistik: Poin, Peringkat, Bintang -->
+          <div class="chef-stats-summary">
+            <div class="chef-stat-item" title="Total akumulasi poin semua resep">
+              <span class="stat-icon">🪙</span>
+              <div class="stat-meta">
+                <span class="stat-number" id="lobby-total-score-val">0</span>
+                <span class="stat-caption">Total Poin</span>
+              </div>
+            </div>
+            <div class="chef-stat-item" id="lobby-rank-stat-card" style="cursor:pointer;" title="Klik untuk membuka Papan Peringkat">
+              <span class="stat-icon">🏆</span>
+              <div class="stat-meta">
+                <span class="stat-number" id="lobby-rank-pos-val">#9</span>
+                <span class="stat-caption">Peringkat Kafe</span>
+              </div>
+            </div>
+            <div class="chef-stat-item" title="Jumlah bintang yang telah diraih">
+              <span class="stat-icon">⭐</span>
+              <div class="stat-meta">
+                <span class="stat-number" id="lobby-total-stars-val">0 / 12</span>
+                <span class="stat-caption">Total Bintang</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar Menuju Level/Gelar Berikutnya -->
+          <div class="chef-level-progress-wrap">
+            <div class="progress-labels">
+              <span id="progress-level-label">Gelar: 🍳 Koki Magang</span>
+              <span id="progress-next-label">0 / 400 Poin</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill-bar" style="width: 10%;"></div>
+            </div>
+          </div>
+
+          <!-- Aksi Cepat: Papan Peringkat & Simpan Game -->
+          <div class="chef-card-actions">
+            <div class="chef-card-buttons">
+              <button class="btn-chef-action" id="btn-lobby-open-leaderboard">
+                <span>🏆</span> Papan Peringkat
+              </button>
+              <button class="btn-chef-action primary" id="btn-lobby-manual-save">
+                <span>💾</span> Simpan Permainan
+              </button>
+            </div>
+            <div class="chef-save-info" id="lobby-save-badge">
+              <span class="save-dot"></span>
+              <span id="lobby-save-text">Tersimpan di perangkat (Lokal)</span>
+            </div>
+          </div>
         </div>
 
         <div class="recipe-grid" id="recipe-list">
@@ -1357,7 +1948,7 @@
           <!-- Floating In-game HUD -->
           <div class="stage-hud">
             <div class="hud-box">
-              <span>⭐ Skor:</span>
+              <span>⭐ Skor Masak:</span>
               <span class="hud-score" id="arena-score">0</span>
             </div>
             <div class="hud-box">
@@ -1400,12 +1991,35 @@
           "Luar biasa! Bahkan Mama sendiri kagum dengan kelezatannya! Restoran bintang lima pasti bangga!"
         </div>
 
+        <!-- Sertifikat Poin & Peringkat Pemain -->
+        <div class="result-score-certificate">
+          <div class="cert-chef-row">
+            <span>👨‍🍳 Koki: <strong id="result-chef-name">Chef Pemula</strong></span>
+            <span class="cert-rank-badge" id="result-chef-rank-badge">🏆 Peringkat #3</span>
+          </div>
+          <div class="cert-stats-grid">
+            <div class="cert-stat-box">
+              <span class="cert-stat-label">🪙 Poin Hidangan:</span>
+              <span class="cert-stat-val" id="result-dish-points">+380</span>
+            </div>
+            <div class="cert-stat-box">
+              <span class="cert-stat-label">🌟 Total Poin Koki:</span>
+              <span class="cert-stat-val" id="result-total-points-val">1,480</span>
+            </div>
+            <div class="cert-stat-box">
+              <span class="cert-stat-label">👑 Gelar Koki:</span>
+              <span class="cert-stat-val" id="result-chef-title" style="font-size:0.85rem;">Sous Chef</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Sync Notification Tag -->
         <div class="result-sync-status" id="result-sync-status" style="display: none;">
-          <span>☁️ Tersimpan ke Cloud Firebase!</span>
+          <span>💾 Tersimpan otomatis di perangkat & cloud!</span>
         </div>
 
         <div class="result-actions">
+          <button class="btn-secondary" id="btn-result-leaderboard" style="background:#FFF7ED; border-color:#FED7AA; color:#EA580C;">Papan Peringkat 🏆</button>
           <button class="btn-secondary" id="btn-replay">Masak Lagi 🔄</button>
           <button class="btn-main" id="btn-menu-back">Pilih Menu Lain 📖</button>
         </div>
@@ -1415,22 +2029,57 @@
     <!-- Confetti canvas overlay -->
     <canvas id="confetti-canvas"></canvas>
 
-    <!-- Cloud & Chef Profile Modal -->
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Papan Peringkat & Modal Profil Koki -->
     <div class="modal-backdrop" id="modal-chef" style="display: none;">
       <div class="modal-card">
         <div class="modal-header">
-          <div class="modal-title">👨‍🍳 Profil Koki & Firebase Cloud</div>
+          <div class="modal-title">🏆 Papan Peringkat & Profil Koki</div>
           <button class="modal-close" id="btn-modal-close">✕</button>
         </div>
         <div class="modal-body">
           <!-- Tab Navigation -->
           <div class="modal-tabs">
-            <button class="modal-tab active" id="tab-profile-btn">Profil & Koneksi</button>
-            <button class="modal-tab" id="tab-leaderboard-btn">Papan Peringkat 🏆</button>
+            <button class="modal-tab active" id="tab-leaderboard-btn">🏆 Papan Peringkat</button>
+            <button class="modal-tab" id="tab-profile-btn">👨‍🍳 Profil & Simpan</button>
           </div>
 
-          <!-- Tab Content 1: Profil & Firebase Config -->
-          <div class="tab-pane active" id="tab-profile-content">
+          <!-- Tab Content 1: Papan Peringkat (Leaderboard) -->
+          <div class="tab-pane active" id="tab-leaderboard-content">
+            <div class="leaderboard-header-banner">
+              <div>
+                <h4 style="font-family:'Fredoka', cursive; color:#EA580C; font-size:1.05rem; margin-bottom:2px;">Top Master Chef Kafe 🌟</h4>
+                <p style="font-size:0.75rem; color:#64748B;">Kumpulkan poin tertinggi dan kalahkan para koki bintang!</p>
+              </div>
+              <button id="btn-refresh-leaderboard" class="btn-refresh-pill" title="Segarkan Papan Skor">🔄 Segarkan</button>
+            </div>
+
+            <div id="leaderboard-loading" style="text-align: center; padding: 15px; color: #64748B;">
+              Memuat peringkat koki...
+            </div>
+            
+            <div class="leaderboard-list" id="leaderboard-list">
+              <!-- Injected by JS -->
+            </div>
+
+            <!-- Sticky Player Position Footer -->
+            <div class="player-rank-sticky-bar" id="player-rank-sticky-bar">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="sticky-badge">KAMU</span>
+                <strong id="sticky-player-name">Chef Pemula</strong>
+                <span style="font-size:0.8rem; color:#CBD5E1;" id="sticky-player-title">(Koki Magang)</span>
+              </div>
+              <div style="display:flex; align-items:center;">
+                <span style="font-size:0.9rem; color:#FDE047; font-weight:700;" id="sticky-player-score">0 PTS</span>
+                <span class="sticky-rank-pill" id="sticky-player-rank">#9</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Profil & Pengaturan Simpan -->
+          <div class="tab-pane" id="tab-profile-content" style="display: none;">
             <div class="input-group">
               <label for="input-chef-name">Nama Koki Anda:</label>
               <div style="display:flex; gap:8px;">
@@ -1441,33 +2090,32 @@
 
             <div class="cloud-info-card">
               <div class="cloud-status-row">
-                <span class="status-label">Status Cloud:</span>
+                <span class="status-label">Status Penyimpanan:</span>
                 <span class="status-badge" id="modal-cloud-status">Memeriksa...</span>
               </div>
               <div class="cloud-status-row" id="row-uid" style="font-size: 0.8rem; color: #64748B;">
                 <span>ID Pemain:</span>
                 <code id="modal-user-uid" style="background:#F1F5F9; padding:2px 6px; border-radius:4px;">-</code>
               </div>
+              <div class="cloud-status-row" style="font-size: 0.8rem; color: #64748B; margin-top: 6px;">
+                <span>Waktu Simpan Terakhir:</span>
+                <span id="modal-last-saved" style="font-weight:600; color:#1E293B;">Baru saja</span>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px; margin: 12px 0;">
+              <button class="btn-sm-primary" id="btn-modal-manual-save" style="flex:1; padding:10px 14px;">💾 Simpan Game Sekarang</button>
+              <button class="btn-sm-secondary" id="btn-modal-reset-data" style="color:#DC2626; border-color:#FECACA;" title="Reset progres ke awal">🔄 Reset Data</button>
             </div>
 
             <details class="firebase-config-details">
-              <summary>⚙️ Pengaturan Kredensial Firebase (Opsional)</summary>
+              <summary>⚙️ Pengaturan Cloud Firebase (Opsional)</summary>
               <p style="font-size:0.8rem; color:#64748B; margin: 8px 0;">
-                Anda bisa mengisi file <code>firebase-sync.js</code> atau tempel konfigurasi JSON dari Firebase Console di sini:
+                Hubungkan ke database Firebase Firestore Anda jika ingin sinkronisasi multi-perangkat:
               </p>
-              <textarea id="input-firebase-config" class="modal-textarea" rows="5" placeholder='{\n  "apiKey": "AIzaSy...",\n  "projectId": "cooking-game-xxx",\n  ...\n}'></textarea>
+              <textarea id="input-firebase-config" class="modal-textarea" rows="4" placeholder='{\n  "apiKey": "AIzaSy...",\n  "projectId": "cooking-game-xxx",\n  ...\n}'></textarea>
               <button class="btn-sm-secondary" id="btn-apply-config" style="margin-top:6px;">Terapkan & Hubungkan 🔥</button>
             </details>
-          </div>
-
-          <!-- Tab Content 2: Leaderboard -->
-          <div class="tab-pane" id="tab-leaderboard-content" style="display: none;">
-            <div id="leaderboard-loading" style="text-align: center; padding: 20px; color: #64748B;">
-              Mengambil data peringkat global...
-            </div>
-            <div class="leaderboard-list" id="leaderboard-list">
-              <!-- Injected by JS -->
-            </div>
           </div>
         </div>
       </div>
@@ -1984,6 +2632,62 @@
        5. LOBBY SCREEN RENDERING
     ======================================================== */
     function renderLobby() {
+      // 1. Render Kartu Profil Koki & Poin Pemain
+      if (window.FirebaseSync) {
+        const chefName = window.FirebaseSync.getChefName();
+        const totalScore = window.FirebaseSync.getTotalScore();
+        const totalStars = window.FirebaseSync.getTotalStars();
+        const rankInfo = window.FirebaseSync.getChefRankInfo();
+
+        const lobbyNameInput = document.getElementById('lobby-chef-name-input');
+        if (lobbyNameInput && document.activeElement !== lobbyNameInput) {
+          lobbyNameInput.value = chefName;
+        }
+
+        const headerChef = document.getElementById('header-chef-name');
+        if (headerChef) headerChef.textContent = chefName;
+
+        const headerPts = document.getElementById('header-total-points-display');
+        if (headerPts) headerPts.textContent = totalScore.toLocaleString();
+
+        const lobbyScore = document.getElementById('lobby-total-score-val');
+        if (lobbyScore) lobbyScore.textContent = totalScore.toLocaleString();
+
+        const lobbyStars = document.getElementById('lobby-total-stars-val');
+        if (lobbyStars) lobbyStars.textContent = `${totalStars} / 12`;
+
+        const lobbyRankPos = document.getElementById('lobby-rank-pos-val');
+        if (lobbyRankPos) lobbyRankPos.textContent = `#${rankInfo.rankPos}`;
+
+        const rankIconEl = document.getElementById('lobby-rank-icon');
+        if (rankIconEl) rankIconEl.textContent = rankInfo.icon;
+
+        const rankTitleEl = document.getElementById('lobby-rank-title');
+        if (rankTitleEl) rankTitleEl.textContent = rankInfo.title;
+
+        const levelLabel = document.getElementById('progress-level-label');
+        if (levelLabel) levelLabel.textContent = `Gelar: ${rankInfo.title}`;
+
+        const nextLabel = document.getElementById('progress-next-label');
+        if (nextLabel) {
+          nextLabel.textContent = rankInfo.nextThreshold 
+            ? `${totalScore.toLocaleString()} / ${rankInfo.nextThreshold.toLocaleString()} Poin`
+            : `${totalScore.toLocaleString()} Poin (Pangkat Tertinggi!)`;
+        }
+
+        const fillBar = document.getElementById('progress-fill-bar');
+        if (fillBar) fillBar.style.width = `${rankInfo.progressPct}%`;
+
+        const saveTextEl = document.getElementById('lobby-save-text');
+        if (saveTextEl) {
+          const isCloud = window.FirebaseSync.isCloudActive;
+          saveTextEl.textContent = isCloud 
+            ? `🟢 Tersinkron Cloud • Pukul ${window.FirebaseSync.getLastSavedTime()}`
+            : `💾 Tersimpan di perangkat (Lokal) • Pukul ${window.FirebaseSync.getLastSavedTime()}`;
+        }
+      }
+
+      // 2. Render Daftar Resep
       recipeListEl.innerHTML = '';
       RECIPES.forEach(recipe => {
         const progress = window.FirebaseSync ? window.FirebaseSync.getRecipeProgress(recipe.id) : { stars: 0, highScore: 0 };
@@ -2041,9 +2745,10 @@
       clearInterval(State.stepTimer);
       const recipe = State.selectedRecipe;
       const step = recipe.steps[State.currentStepIndex];
+      const chefName = window.FirebaseSync ? window.FirebaseSync.getChefName() : 'Koki';
 
       stepIndicator.textContent = `Langkah ${State.currentStepIndex + 1}/${recipe.steps.length}`;
-      mamaSpeechText.textContent = step.mamaAdvice;
+      mamaSpeechText.textContent = `Ayo Chef ${chefName}! ${step.mamaAdvice}`;
       arenaScore.textContent = State.totalScore;
       
       State.timeLeft = 15;
@@ -2573,13 +3278,19 @@
         commentEl.textContent = `"Jangan menyerah! Mama selalu siap membantumu mencoba lagi sampai sempurna!"`;
       }
 
-      // Simpan skor dan rekor ke Firebase & Lokal
+      // Update Sertifikat Poin & Peringkat Pemain
+      const currentChefName = window.FirebaseSync ? window.FirebaseSync.getChefName() : 'Chef Pemula';
+      document.getElementById('result-chef-name').textContent = currentChefName;
+      document.getElementById('result-dish-points').textContent = `+${State.totalScore.toLocaleString()} PTS`;
+
+      // Simpan skor, poin, dan peringkat ke LocalStorage & Firebase
       if (window.FirebaseSync) {
         const syncStatusEl = document.getElementById('result-sync-status');
         if (syncStatusEl) {
-          syncStatusEl.innerHTML = `<span>⏳ Menyimpan rekor memasak...</span>`;
+          syncStatusEl.innerHTML = `<span>⏳ Menyimpan rekor memasak & poin...</span>`;
           syncStatusEl.style.display = 'flex';
         }
+
         window.FirebaseSync.saveCookingResult({
           recipeId: recipe.id,
           recipeName: recipe.name,
@@ -2587,13 +3298,23 @@
           scorePct: scorePct,
           stars: starsEarned,
           verdict: stampEl.textContent
-        }).then(({ isNewHighScore }) => {
+        }).then(({ isNewHighScore, totalScore, rankPos }) => {
+          const rankInfo = window.FirebaseSync.getChefRankInfo();
+          document.getElementById('result-total-points-val').textContent = `${totalScore.toLocaleString()} PTS`;
+          document.getElementById('result-chef-title').textContent = rankInfo.title;
+          document.getElementById('result-chef-rank-badge').textContent = `🏆 Peringkat #${rankPos}`;
+
+          const headerPts = document.getElementById('header-total-points-display');
+          if (headerPts) headerPts.textContent = totalScore.toLocaleString();
+
           if (syncStatusEl) {
             const isCloud = window.FirebaseSync.isCloudActive;
             syncStatusEl.innerHTML = isCloud 
-              ? `<span>☁️ Tersimpan ke Cloud Firebase! ${isNewHighScore ? '🏆 REKOR BARU!' : ''}</span>`
-              : `<span>💾 Tersimpan di perangkat (Lokal). ${isNewHighScore ? '🏆 REKOR BARU!' : ''}</span>`;
+              ? `<span>☁️ Tersimpan ke Cloud Firebase! Peringkat #${rankPos} di Kafe! ${isNewHighScore ? '🏆 REKOR BARU!' : ''}</span>`
+              : `<span>💾 Tersimpan di perangkat (Lokal). Peringkat #${rankPos} di Kafe! ${isNewHighScore ? '🏆 REKOR BARU!' : ''}</span>`;
           }
+
+          showToast(`💾 Skor +${State.totalScore} poin & Peringkat #${rankPos} berhasil disimpan!`, 'save');
         });
       }
     }
@@ -2651,6 +3372,25 @@
     }
 
     /* ========================================================
+       8B. TOAST NOTIFICATION ENGINE
+    ======================================================== */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      let icon = '📢';
+      if (type === 'save') icon = '💾';
+      else if (type === 'name') icon = '👨‍🍳';
+      else if (type === 'rank') icon = '🏆';
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) toast.parentElement.removeChild(toast);
+      }, 3000);
+    }
+
+    /* ========================================================
        9. INITIALIZATION & EVENT LISTENERS
     ======================================================== */
     btnStartCook.addEventListener('click', () => {
@@ -2667,6 +3407,7 @@
       sound.playPop();
       clearInterval(State.stepTimer);
       showScreen(screenLobby);
+      renderLobby();
     });
 
     btnReplay.addEventListener('click', () => {
@@ -2680,8 +3421,16 @@
       renderLobby();
     });
 
+    // Tombol buka leaderboard dari layar hasil
+    const btnResultLeaderboard = document.getElementById('btn-result-leaderboard');
+    if (btnResultLeaderboard) {
+      btnResultLeaderboard.addEventListener('click', () => {
+        openModal('leaderboard');
+      });
+    }
+
     /* ========================================================
-       10. FIREBASE & CHEF PROFILE MODAL LOGIC
+       10. FIREBASE, PROFILE & LEADERBOARD LOGIC
     ======================================================== */
     const modalChef = document.getElementById('modal-chef');
     const btnChefProfile = document.getElementById('btn-chef-profile');
@@ -2702,17 +3451,21 @@
     const tabLeaderboardContent = document.getElementById('tab-leaderboard-content');
     const leaderboardLoading = document.getElementById('leaderboard-loading');
     const leaderboardList = document.getElementById('leaderboard-list');
+    const btnRefreshLeaderboard = document.getElementById('btn-refresh-leaderboard');
 
-    function openModal(tab = 'profile') {
+    function openModal(tab = 'leaderboard') {
       sound.playPop();
       modalChef.style.display = 'flex';
       inputChefName.value = window.FirebaseSync.getChefName();
+      const modalLastSaved = document.getElementById('modal-last-saved');
+      if (modalLastSaved) modalLastSaved.textContent = `Pukul ${window.FirebaseSync.getLastSavedTime()}`;
       switchModalTab(tab);
     }
 
     function closeModal() {
       sound.playPop();
       modalChef.style.display = 'none';
+      renderLobby();
     }
 
     function switchModalTab(tab) {
@@ -2730,44 +3483,75 @@
       }
     }
 
+    // Memuat dan merender Papan Peringkat (Dukungan Penuh Offline + Online)
     async function loadLeaderboardData() {
       leaderboardLoading.style.display = 'block';
       leaderboardList.innerHTML = '';
 
-      if (!window.FirebaseSync.isCloudActive) {
-        leaderboardLoading.innerHTML = `
-          <p>⚠️ Hubungkan Firebase untuk mengaktifkan Papan Peringkat Global!</p>
-          <p style="font-size:0.8rem; margin-top:6px; color:#94A3B8;">Saat ini bermain dalam mode offline (lokal).</p>
-        `;
-        return;
-      }
-
-      leaderboardLoading.textContent = 'Mengambil data dari Cloud Firestore...';
+      leaderboardLoading.textContent = 'Mengambil data peringkat koki...';
       const items = await window.FirebaseSync.fetchLeaderboard(10);
       leaderboardLoading.style.display = 'none';
 
       if (!items || items.length === 0) {
-        leaderboardList.innerHTML = `<p style="text-align:center; color:#64748B;">Belum ada skor yang dicatat. Jadilah yang pertama!</p>`;
+        leaderboardList.innerHTML = `<p style="text-align:center; color:#64748B; padding:15px;">Belum ada skor koki. Jadilah yang pertama!</p>`;
         return;
       }
 
       items.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = 'leaderboard-item';
+        const rankNum = index + 1;
+        const rankClass = rankNum === 1 ? 'rank-1' : rankNum === 2 ? 'rank-2' : rankNum === 3 ? 'rank-3' : '';
+        const playerClass = item.isPlayer ? 'is-player' : '';
+        row.className = `leaderboard-item ${rankClass} ${playerClass}`;
+
+        const medalIcon = rankNum === 1 ? '🥇' : rankNum === 2 ? '🥈' : rankNum === 3 ? '🥉' : `#${rankNum}`;
+
         row.innerHTML = `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="leaderboard-rank">#${index + 1}</span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="leaderboard-rank">${medalIcon}</span>
             <div>
-              <div style="font-weight:700; color:#1E293B;">${item.chefName || 'Chef'}</div>
-              <div style="font-size:0.75rem; color:#64748B;">${item.recipeName || 'Menu'}</div>
+              <div style="font-weight:700; color:#1E293B; display:flex; align-items:center;">
+                ${item.chefName || 'Chef'}
+                ${item.isPlayer ? '<span class="player-tag">KAMU</span>' : ''}
+              </div>
+              <div style="font-size:0.75rem; color:#64748B;">
+                ${item.recipeName || 'Menu'} ${item.badge ? `• <span style="color:#EA580C; font-weight:600;">${item.badge}</span>` : ''}
+              </div>
             </div>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:#EA580C; font-size:1.05rem;">${item.score || 0}</div>
+            <div style="font-weight:700; color:#EA580C; font-size:1.05rem;">${(item.score || 0).toLocaleString()} <span style="font-size:0.75rem;">PTS</span></div>
             <div style="font-size:0.75rem; color:#F59E0B;">${'⭐'.repeat(item.stars || 1)} (${item.scorePct || 0}%)</div>
           </div>
         `;
         leaderboardList.appendChild(row);
+      });
+
+      // Update Sticky Bar Posisi Pemain
+      if (window.FirebaseSync) {
+        const playerName = window.FirebaseSync.getChefName();
+        const totalScore = window.FirebaseSync.getTotalScore();
+        const rankInfo = window.FirebaseSync.getChefRankInfo();
+
+        const stickyName = document.getElementById('sticky-player-name');
+        if (stickyName) stickyName.textContent = playerName;
+
+        const stickyTitle = document.getElementById('sticky-player-title');
+        if (stickyTitle) stickyTitle.textContent = `(${rankInfo.title})`;
+
+        const stickyScore = document.getElementById('sticky-player-score');
+        if (stickyScore) stickyScore.textContent = `${totalScore.toLocaleString()} PTS`;
+
+        const stickyRank = document.getElementById('sticky-player-rank');
+        if (stickyRank) stickyRank.textContent = `#${rankInfo.rankPos}`;
+      }
+    }
+
+    if (btnRefreshLeaderboard) {
+      btnRefreshLeaderboard.addEventListener('click', () => {
+        sound.playPop();
+        loadLeaderboardData();
+        showToast("🔄 Papan peringkat diperbarui!", "rank");
       });
     }
 
@@ -2781,16 +3565,99 @@
     tabProfileBtn.addEventListener('click', () => switchModalTab('profile'));
     tabLeaderboardBtn.addEventListener('click', () => switchModalTab('leaderboard'));
 
+    // Ganti nama koki dari modal
     btnSaveChefName.addEventListener('click', () => {
       sound.playPop();
       const newName = inputChefName.value.trim();
       if (newName) {
         window.FirebaseSync.setChefName(newName);
         headerChefName.textContent = newName;
-        alert(`Nama koki berhasil diubah menjadi: ${newName}`);
+        renderLobby();
+        showToast(`✏️ Nama koki berhasil diubah menjadi: ${newName}`, 'name');
       }
     });
 
+    // Ganti nama koki dari input kartu lobi
+    const btnLobbySaveName = document.getElementById('btn-lobby-save-name');
+    const lobbyChefNameInput = document.getElementById('lobby-chef-name-input');
+    if (btnLobbySaveName && lobbyChefNameInput) {
+      btnLobbySaveName.addEventListener('click', () => {
+        sound.playPop();
+        const newName = lobbyChefNameInput.value.trim();
+        if (newName) {
+          window.FirebaseSync.setChefName(newName);
+          renderLobby();
+          showToast(`✏️ Nama koki berhasil disimpan: ${newName}`, 'name');
+        }
+      });
+
+      lobbyChefNameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          btnLobbySaveName.click();
+        }
+      });
+    }
+
+    // Tombol simpan manual dari kartu lobi
+    const btnLobbyManualSave = document.getElementById('btn-lobby-manual-save');
+    if (btnLobbyManualSave) {
+      btnLobbyManualSave.addEventListener('click', () => {
+        sound.playPop();
+        const res = window.FirebaseSync.manualSave();
+        renderLobby();
+        showToast(`💾 Progres, poin & nama berhasil disimpan aman! (Pukul ${res.timestamp})`, 'save');
+      });
+    }
+
+    // Tombol simpan manual dari top header
+    const btnHeaderQuickSave = document.getElementById('btn-header-quick-save');
+    if (btnHeaderQuickSave) {
+      btnHeaderQuickSave.addEventListener('click', () => {
+        sound.playPop();
+        const res = window.FirebaseSync.manualSave();
+        renderLobby();
+        showToast(`💾 Permainan disimpan! Total: ${res.totalScore.toLocaleString()} Poin`, 'save');
+      });
+    }
+
+    // Tombol simpan manual dari modal profil
+    const btnModalManualSave = document.getElementById('btn-modal-manual-save');
+    if (btnModalManualSave) {
+      btnModalManualSave.addEventListener('click', () => {
+        sound.playPop();
+        const res = window.FirebaseSync.manualSave();
+        const modalLastSaved = document.getElementById('modal-last-saved');
+        if (modalLastSaved) modalLastSaved.textContent = `Pukul ${res.timestamp}`;
+        renderLobby();
+        showToast(`💾 Data game berhasil disimpan!`, 'save');
+      });
+    }
+
+    // Tombol reset data game
+    const btnModalResetData = document.getElementById('btn-modal-reset-data');
+    if (btnModalResetData) {
+      btnModalResetData.addEventListener('click', () => {
+        if (confirm("Apakah Anda yakin ingin mereset semua data, poin, dan peringkat? Tindakan ini tidak dapat dibatalkan!")) {
+          sound.playPop();
+          window.FirebaseSync.resetSaveData();
+          renderLobby();
+          closeModal();
+          showToast("🔄 Data game berhasil direset ke awal.", "info");
+        }
+      });
+    }
+
+    // Tombol buka leaderboard dari kartu lobi
+    const btnLobbyOpenLeaderboard = document.getElementById('btn-lobby-open-leaderboard');
+    const lobbyRankStatCard = document.getElementById('lobby-rank-stat-card');
+    if (btnLobbyOpenLeaderboard) {
+      btnLobbyOpenLeaderboard.addEventListener('click', () => openModal('leaderboard'));
+    }
+    if (lobbyRankStatCard) {
+      lobbyRankStatCard.addEventListener('click', () => openModal('leaderboard'));
+    }
+
+    // Konfigurasi Firebase manual
     btnApplyConfig.addEventListener('click', () => {
       sound.playPop();
       const val = inputFirebaseConfig.value.trim();
@@ -2801,9 +3668,16 @@
       try {
         const parsed = JSON.parse(val);
         window.FirebaseSync.saveCustomConfig(parsed);
-        alert("Konfigurasi disimpan! Menghubungkan ulang ke Firebase...");
+        showToast("🔥 Konfigurasi disimpan! Menghubungkan ke Firebase...", "save");
       } catch (err) {
         alert("Format JSON tidak valid! Pastikan format JSON benar sesuai dari Firebase Console.");
+      }
+    });
+
+    // Auto-save saat user menutup atau me-refresh halaman
+    window.addEventListener('beforeunload', () => {
+      if (window.FirebaseSync) {
+        window.FirebaseSync.saveLocalCache();
       }
     });
 

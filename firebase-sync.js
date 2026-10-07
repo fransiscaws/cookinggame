@@ -1,14 +1,12 @@
 /**
  * ========================================================
- * Chef Mama - Firebase Integration & Cloud Sync Engine
+ * Chef Mama - Firebase Integration & Local/Cloud Sync Engine
  * ========================================================
- * Menyediakan sinkronisasi cloud data pemain, skor tertinggi,
- * bintang resep, profil koki, dan papan peringkat (leaderboard)
- * dengan fallback otomatis ke LocalStorage jika offline/belum dikonfigurasi.
+ * Sistem penyimpanan lengkap: Nama Koki, Total Poin, 
+ * Papan Peringkat (Leaderboard) Lokal & Cloud, serta
+ * status penyimpanan otomatis & manual (LocalStorage + Firestore).
  */
 
-// 1. TEMPATKAN KREDENSIAL FIREBASE ANDA DI SINI
-// Ambil dari: Firebase Console -> Project Settings -> General -> Your apps -> Web app
 const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyD6uuoiIZFSpfZ4ovlttY7ySCsDeCd4pvU",
   authDomain: "fransiscaws-84b8a.firebaseapp.com",
@@ -18,6 +16,18 @@ const DEFAULT_FIREBASE_CONFIG = {
   appId: "1:243010512562:web:c7f12f475f2aea74578bab"
 };
 
+// Daftar koki penantang bawaan untuk papan peringkat kompetitif
+const DEFAULT_RIVAL_CHEFS = [
+  { id: "rival_mama", chefName: "Chef Mama 🌟", recipeName: "All Star Gourmet", score: 2850, stars: 3, scorePct: 100, isPlayer: false, badge: "Master Chef" },
+  { id: "rival_gordon", chefName: "Chef Gordon 🔥", recipeName: "Truffle Wagyu Smash Burger", score: 2420, stars: 3, scorePct: 98, isPlayer: false, badge: "Head Chef" },
+  { id: "rival_arnold", chefName: "Chef Arnold 🍳", recipeName: "Fluffy Matcha Soufflé", score: 2150, stars: 3, scorePct: 96, isPlayer: false, badge: "Head Chef" },
+  { id: "rival_renatta", chefName: "Chef Renatta 🥗", recipeName: "Artisan Avocado Toast", score: 1880, stars: 3, scorePct: 94, isPlayer: false, badge: "Sous Chef" },
+  { id: "rival_juna", chefName: "Chef Juna 🌶️", recipeName: "Rainbow Salmon Poke Bowl", score: 1650, stars: 2, scorePct: 90, isPlayer: false, badge: "Sous Chef" },
+  { id: "rival_sanji", chefName: "Chef Sanji 🍱", recipeName: "Artisan Toast & Egg", score: 1390, stars: 2, scorePct: 88, isPlayer: false, badge: "Koki Junior" },
+  { id: "rival_devina", chefName: "Chef Devina 🍰", recipeName: "Japanese Soufflé", score: 1150, stars: 2, scorePct: 85, isPlayer: false, badge: "Koki Junior" },
+  { id: "rival_budi", chefName: "Chef Budi 🥑", recipeName: "Truffle Burger", score: 850, stars: 1, scorePct: 75, isPlayer: false, badge: "Koki Magang" }
+];
+
 class FirebaseSyncEngine {
   constructor() {
     this.app = null;
@@ -25,30 +35,65 @@ class FirebaseSyncEngine {
     this.db = null;
     this.currentUser = null;
     this.isCloudActive = false;
-    this.statusMessage = "Mode Lokal (Offline)";
+    this.statusMessage = "Mode Penyimpanan Lokal (LocalStorage)";
+    this.listeners = [];
     
-    // Load local cache
+    // Inisialisasi cache lokal
     this.localData = this.loadLocalCache();
   }
 
   loadLocalCache() {
     try {
       const raw = localStorage.getItem('chefmama_save_data');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Pastikan struktur lengkap
+        if (!parsed.chefName) parsed.chefName = "Chef Pemula";
+        if (!parsed.recipes) parsed.recipes = {};
+        if (typeof parsed.totalScore !== 'number') parsed.totalScore = 0;
+        if (typeof parsed.totalStars !== 'number') parsed.totalStars = 0;
+        if (!Array.isArray(parsed.localLeaderboard) || parsed.localLeaderboard.length === 0) {
+          parsed.localLeaderboard = this.generateInitialLeaderboard(parsed.chefName, parsed.totalScore);
+        }
+        if (!parsed.lastSaved) parsed.lastSaved = new Date().toISOString();
+        return parsed;
+      }
     } catch (e) {
       console.warn("Gagal membaca localStorage:", e);
     }
+
+    const defaultName = "Chef " + ["Gourmet", "Bintang", "Handal", "Kreatif", "Cilik"][Math.floor(Math.random() * 5)];
     return {
-      chefName: "Chef Gourmet #" + Math.floor(1000 + Math.random() * 9000),
+      chefName: defaultName,
       recipes: {},
       totalScore: 0,
       totalStars: 0,
+      lastSaved: new Date().toISOString(),
+      localLeaderboard: this.generateInitialLeaderboard(defaultName, 0),
       firebaseConfig: null
     };
   }
 
+  generateInitialLeaderboard(playerName, playerScore) {
+    const list = [...DEFAULT_RIVAL_CHEFS];
+    // Masukkan entri pemain awal
+    list.push({
+      id: "player_main",
+      chefName: playerName,
+      recipeName: "Total Rekor Koki",
+      score: playerScore || 0,
+      stars: 1,
+      scorePct: 70,
+      isPlayer: true,
+      badge: "Koki Magang"
+    });
+    list.sort((a, b) => b.score - a.score);
+    return list;
+  }
+
   saveLocalCache() {
     try {
+      this.localData.lastSaved = new Date().toISOString();
       localStorage.setItem('chefmama_save_data', JSON.stringify(this.localData));
     } catch (e) {
       console.warn("Gagal menyimpan ke localStorage:", e);
@@ -56,8 +101,6 @@ class FirebaseSyncEngine {
   }
 
   getActiveConfig() {
-    // Utamakan konfigurasi yang tersimpan di localStorage (jika user input via modal),
-    // atau DEFAULT_FIREBASE_CONFIG
     if (this.localData.firebaseConfig && this.localData.firebaseConfig.apiKey && this.localData.firebaseConfig.apiKey !== "YOUR_API_KEY") {
       return this.localData.firebaseConfig;
     }
@@ -66,22 +109,18 @@ class FirebaseSyncEngine {
 
   async init() {
     const config = this.getActiveConfig();
-
-    // Cek apakah konfigurasi sudah valid (bukan placeholder "YOUR_API_KEY")
     const isConfigured = config && config.apiKey && config.apiKey !== "YOUR_API_KEY" && config.projectId && config.projectId !== "YOUR_PROJECT_ID";
 
     if (!isConfigured) {
       this.isCloudActive = false;
-      this.statusMessage = "Mode Lokal (Offline)";
-      console.log("ℹ️ Firebase belum dikonfigurasi. Menggunakan penyimpanan LocalStorage.");
+      this.statusMessage = "Penyimpanan Lokal Aktif (Offline)";
       this.notifyListeners();
       return;
     }
 
     if (typeof firebase === 'undefined') {
-      console.warn("SDK Firebase belum dimuat di HTML.");
       this.isCloudActive = false;
-      this.statusMessage = "SDK Firebase Belum Siap";
+      this.statusMessage = "Penyimpanan Lokal (SDK Firebase Belum Dimuat)";
       this.notifyListeners();
       return;
     }
@@ -100,16 +139,14 @@ class FirebaseSyncEngine {
       const userCredential = await this.auth.signInAnonymously();
       this.currentUser = userCredential.user;
       this.isCloudActive = true;
-      this.statusMessage = "Cloud Terhubung (Online)";
+      this.statusMessage = "Cloud Firebase Terhubung (Online)";
 
       console.log("🔥 Firebase terhubung sebagai:", this.currentUser.uid);
-
-      // Sinkronkan data profil dari / ke Cloud
       await this.syncWithCloud();
     } catch (err) {
-      console.error("Gagal inisialisasi Firebase:", err);
+      console.warn("Koneksi Firebase Cloud tidak dapat terhubung, melanjutkan mode lokal aman:", err.message);
       this.isCloudActive = false;
-      this.statusMessage = "Koneksi Cloud Gagal";
+      this.statusMessage = "Mode Penyimpanan Lokal (Offline)";
     }
 
     this.notifyListeners();
@@ -124,8 +161,7 @@ class FirebaseSyncEngine {
 
       if (docSnap.exists) {
         const cloudData = docSnap.data();
-        // Gabungkan data cloud ke data lokal (ambil nilai tertinggi)
-        if (cloudData.chefName) {
+        if (cloudData.chefName && cloudData.chefName !== "Chef Koki") {
           this.localData.chefName = cloudData.chefName;
         }
 
@@ -142,9 +178,9 @@ class FirebaseSyncEngine {
           }
         }
         this.recalculateTotals();
+        this.updatePlayerInLeaderboard();
         this.saveLocalCache();
       } else {
-        // Dokumen baru untuk pemain ini di cloud
         await userDocRef.set({
           chefName: this.localData.chefName,
           recipes: this.localData.recipes,
@@ -155,30 +191,99 @@ class FirebaseSyncEngine {
         }, { merge: true });
       }
     } catch (err) {
-      console.warn("Gagal sinkron data cloud:", err);
+      console.warn("Gagal sinkron data cloud, tetap menggunakan data lokal:", err);
     }
   }
 
+  // Mengubah & menyimpan nama koki
   setChefName(name) {
     if (!name || !name.trim()) return;
-    this.localData.chefName = name.trim();
+    const cleanName = name.trim();
+    this.localData.chefName = cleanName;
+
+    // Perbarui nama di entri papan peringkat lokal
+    this.updatePlayerInLeaderboard();
     this.saveLocalCache();
 
+    // Perbarui ke cloud jika online
     if (this.isCloudActive && this.currentUser && this.db) {
       this.db.collection('users').doc(this.currentUser.uid).set({
-        chefName: this.localData.chefName,
+        chefName: cleanName,
         lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true }).catch(err => console.warn(err));
     }
+
     this.notifyListeners();
+    return cleanName;
   }
 
   getChefName() {
-    return this.localData.chefName || "Chef Koki";
+    return this.localData.chefName || "Chef Gourmet";
+  }
+
+  getTotalScore() {
+    return this.localData.totalScore || 0;
+  }
+
+  getTotalStars() {
+    return this.localData.totalStars || 0;
   }
 
   getRecipeProgress(recipeId) {
     return this.localData.recipes[recipeId] || { highScore: 0, stars: 0, scorePct: 0, playCount: 0 };
+  }
+
+  // Menghitung gelar & tingkatan koki berdasarkan total poin
+  getChefRankInfo() {
+    const score = this.getTotalScore();
+    let title = "🍳 Koki Magang";
+    let icon = "🍳";
+    let nextThreshold = 400;
+    let minThreshold = 0;
+
+    if (score >= 2500) {
+      title = "👑 Master Chef Bintang 5";
+      icon = "👑";
+      nextThreshold = 3500;
+      minThreshold = 2500;
+    } else if (score >= 1600) {
+      title = "⭐ Head Chef Bintang 2";
+      icon = "⭐";
+      nextThreshold = 2500;
+      minThreshold = 1600;
+    } else if (score >= 900) {
+      title = "👨‍🍳 Sous Chef Berbakat";
+      icon = "👨‍🍳";
+      nextThreshold = 1600;
+      minThreshold = 900;
+    } else if (score >= 400) {
+      title = "🔪 Koki Junior";
+      icon = "🔪";
+      nextThreshold = 900;
+      minThreshold = 400;
+    }
+
+    const progressPct = nextThreshold 
+      ? Math.min(100, Math.round(((score - minThreshold) / (nextThreshold - minThreshold)) * 100))
+      : 100;
+
+    // Tentukan posisi peringkat di leaderboard lokal
+    const rankPos = this.getPlayerRankPosition();
+
+    return {
+      title,
+      icon,
+      score,
+      nextThreshold,
+      progressPct: Math.max(5, progressPct),
+      rankPos
+    };
+  }
+
+  getPlayerRankPosition() {
+    const list = this.getLocalLeaderboard();
+    const idx = list.findIndex(item => item.isPlayer);
+    return idx >= 0 ? idx + 1 : list.length;
   }
 
   recalculateTotals() {
@@ -192,6 +297,48 @@ class FirebaseSyncEngine {
     this.localData.totalStars = stars;
   }
 
+  updatePlayerInLeaderboard() {
+    if (!this.localData.localLeaderboard) {
+      this.localData.localLeaderboard = this.generateInitialLeaderboard(this.localData.chefName, this.localData.totalScore);
+    }
+
+    const playerName = this.localData.chefName;
+    const totalScore = this.localData.totalScore;
+    const rankInfo = this.getChefRankInfo();
+
+    // Perbarui entri utama pemain
+    let playerEntry = this.localData.localLeaderboard.find(item => item.isPlayer && item.id === "player_main");
+    if (!playerEntry) {
+      playerEntry = {
+        id: "player_main",
+        chefName: playerName,
+        recipeName: "Total Rekor Koki",
+        score: totalScore,
+        stars: this.localData.totalStars,
+        scorePct: 95,
+        isPlayer: true,
+        badge: rankInfo.title
+      };
+      this.localData.localLeaderboard.push(playerEntry);
+    } else {
+      playerEntry.chefName = playerName;
+      playerEntry.score = totalScore;
+      playerEntry.stars = this.localData.totalStars;
+      playerEntry.badge = rankInfo.title;
+    }
+
+    // Perbarui nama di entri resep pemain lainnya jika ada
+    this.localData.localLeaderboard.forEach(item => {
+      if (item.isPlayer) {
+        item.chefName = playerName;
+      }
+    });
+
+    // Urutkan kembali berdasarkan skor tertinggi
+    this.localData.localLeaderboard.sort((a, b) => b.score - a.score);
+  }
+
+  // Simpan hasil memasak
   async saveCookingResult({ recipeId, recipeName, score, scorePct, stars, verdict }) {
     const prev = this.localData.recipes[recipeId] || { highScore: 0, stars: 0, scorePct: 0, playCount: 0 };
     
@@ -209,10 +356,34 @@ class FirebaseSyncEngine {
 
     this.localData.recipes[recipeId] = updatedRecipeData;
     this.recalculateTotals();
+
+    // Tambah / Perbarui entri resep ini di leaderboard lokal
+    const recipeEntryId = `player_${recipeId}`;
+    let recipeEntry = this.localData.localLeaderboard.find(item => item.id === recipeEntryId);
+    if (!recipeEntry) {
+      this.localData.localLeaderboard.push({
+        id: recipeEntryId,
+        chefName: this.localData.chefName,
+        recipeName: recipeName,
+        score: updatedRecipeData.highScore,
+        stars: updatedRecipeData.stars,
+        scorePct: updatedRecipeData.bestScorePct,
+        isPlayer: true,
+        badge: verdict
+      });
+    } else {
+      recipeEntry.chefName = this.localData.chefName;
+      recipeEntry.score = updatedRecipeData.highScore;
+      recipeEntry.stars = updatedRecipeData.stars;
+      recipeEntry.scorePct = updatedRecipeData.bestScorePct;
+      recipeEntry.badge = verdict;
+    }
+
+    this.updatePlayerInLeaderboard();
     this.saveLocalCache();
     this.notifyListeners();
 
-    // Simpan ke Firestore jika terhubung
+    // Simpan ke Firestore jika aktif
     if (this.isCloudActive && this.currentUser && this.db) {
       try {
         const userRef = this.db.collection('users').doc(this.currentUser.uid);
@@ -224,7 +395,6 @@ class FirebaseSyncEngine {
           lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        // Simpan juga ke Leaderboard Global jika skor tinggi
         const leaderRef = this.db.collection('leaderboard').doc(`${this.currentUser.uid}_${recipeId}`);
         await leaderRef.set({
           uid: this.currentUser.uid,
@@ -236,46 +406,100 @@ class FirebaseSyncEngine {
           scorePct: updatedRecipeData.bestScorePct,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-
-        console.log("☁️ Skor berhasil disinkronkan ke Cloud Firestore!");
       } catch (err) {
-        console.warn("Gagal menyimpan ke Firestore:", err);
+        console.warn("Gagal menyimpan ke Firestore, data lokal tetap aman:", err);
       }
     }
 
-    return { isNewHighScore, isMoreStars };
+    const rankPos = this.getPlayerRankPosition();
+    return {
+      isNewHighScore,
+      isMoreStars,
+      totalScore: this.localData.totalScore,
+      rankPos
+    };
   }
 
+  // Dapatkan Papan Peringkat Lokal
+  getLocalLeaderboard(limitCount = 10) {
+    if (!this.localData.localLeaderboard) {
+      this.localData.localLeaderboard = this.generateInitialLeaderboard(this.localData.chefName, this.localData.totalScore);
+    }
+    // Urutkan skor tertinggi
+    const sorted = [...this.localData.localLeaderboard].sort((a, b) => b.score - a.score);
+    return sorted.slice(0, limitCount);
+  }
+
+  // Dapatkan Papan Peringkat (Cloud dengan fallback ke Lokal)
   async fetchLeaderboard(limitCount = 10) {
-    if (!this.isCloudActive || !this.db) {
-      return [];
+    if (this.isCloudActive && this.db) {
+      try {
+        const snap = await this.db.collection('leaderboard')
+          .orderBy('score', 'desc')
+          .limit(limitCount)
+          .get();
+
+        if (!snap.empty) {
+          const list = [];
+          snap.forEach(doc => {
+            const data = doc.data();
+            list.push({
+              id: doc.id,
+              ...data,
+              isPlayer: (this.currentUser && data.uid === this.currentUser.uid) || (data.chefName === this.localData.chefName)
+            });
+          });
+          if (list.length > 0) return list;
+        }
+      } catch (err) {
+        console.warn("Koneksi Firestore gagal mengambil leaderboard, menggunakan lokal:", err);
+      }
     }
 
+    // Fallback otomatis ke Papan Peringkat Lokal
+    return this.getLocalLeaderboard(limitCount);
+  }
+
+  // Simpan manual dengan feedback langsung
+  manualSave() {
+    this.saveLocalCache();
+    if (this.isCloudActive && this.currentUser && this.db) {
+      this.syncWithCloud();
+    }
+    this.notifyListeners();
+    return {
+      success: true,
+      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      totalScore: this.localData.totalScore,
+      chefName: this.localData.chefName,
+      isCloud: this.isCloudActive
+    };
+  }
+
+  getLastSavedTime() {
+    if (!this.localData.lastSaved) return "Baru saja";
     try {
-      const snap = await this.db.collection('leaderboard')
-        .orderBy('score', 'desc')
-        .limit(limitCount)
-        .get();
-
-      const list = [];
-      snap.forEach(doc => {
-        list.push({ id: doc.id, ...doc.data() });
-      });
-      return list;
-    } catch (err) {
-      console.warn("Gagal mengambil leaderboard:", err);
-      return [];
+      const d = new Date(this.localData.lastSaved);
+      return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return "Tersimpan";
     }
+  }
+
+  // Reset data (jika pemain ingin mengulang dari 0)
+  resetSaveData() {
+    localStorage.removeItem('chefmama_save_data');
+    this.localData = this.loadLocalCache();
+    this.notifyListeners();
+    return true;
   }
 
   saveCustomConfig(newConfig) {
     this.localData.firebaseConfig = newConfig;
     this.saveLocalCache();
-    // Restart koneksi
     return this.init();
   }
 
-  listeners = [];
   onStatusChange(fn) {
     this.listeners.push(fn);
     fn(this);
